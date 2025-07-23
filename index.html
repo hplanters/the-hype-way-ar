@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Hype Way AR - Sneaker Culture</title>
+    
+    <!-- A-Frame y AR.js -->
+    <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.4.5/aframe/build/aframe-ar.min.js"></script>
+    
+    <!-- Estilos custom -->
+    <link rel="stylesheet" href="assets/css/style.css">
+    
+    <!-- Meta tags para sharing -->
+    <meta property="og:title" content="The Hype Way AR - Jordan 1 Chicago">
+    <meta property="og:description" content="Descubre la historia del Air Jordan 1 Chicago en AR">
+    <meta property="og:image" content="https://hplanters.github.io/the-hype-way-ar/assets/images/og-preview.jpg">
+    <meta property="og:url" content="https://hplanters.github.io/the-hype-way-ar">
+    <meta name="twitter:card" content="summary_large_image">
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loading-screen">
+        <div class="loading-content">
+            <div class="hype-logo">🔥</div>
+            <h2>The Hype Way AR</h2>
+            <p>Cargando experiencia AR...</p>
+            <div class="loading-spinner"></div>
+        </div>
+    </div>
+    
+    <!-- Instructions Overlay -->
+    <div id="instructions" class="overlay">
+        <div class="instruction-content">
+            <h3>🎯 ¿Cómo usar?</h3>
+            <ol>
+                <li>Permite acceso a la cámara</li>
+                <li>Apunta a tu sneaker planter</li>
+                <li>Espera a que aparezca la información</li>
+                <li>Toca para más detalles</li>
+            </ol>
+            <button id="start-ar" class="cta-button">¡Empezar AR!</button>
+        </div>
+    </div>
+    
+    <!-- AR Scene -->
+    <a-scene
+        id="ar-scene"
+        embedded
+        arjs="trackingMethod: best; sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3;"
+        renderer="logarithmicDepthBuffer: true; colorManagement: true; sortObjects: true;"
+        vr-mode-ui="enabled: false"
+        device-orientation-permission-ui="enabled: false">
+        
+        <!-- Marker para Jordan 1 Chicago -->
+        <a-marker
+            id="jordan-1-marker"
+            type="pattern"
+            preset="custom"
+            url="models/jordan-1-chicago/pattern.patt"
+            raycaster="objects: .clickable"
+            emitevents="true"
+            cursor="fuse: false; rayOrigin: mouse;">
+            
+            <!-- Contenedor principal del contenido AR -->
+            <a-entity id="ar-content" position="0 0 0" rotation="-90 0 0">
+                
+                <!-- Background panel -->
+                <a-plane 
+                    id="bg-panel"
+                    position="0 1 -0.1"
+                    rotation="0 0 0"
+                    width="4"
+                    height="3"
+                    color="#000000"
+                    opacity="0.85"
+                    material="transparent: true">
+                </a-plane>
+                
+                <!-- Título principal -->
+                <a-text
+                    id="title-text"
+                    value="Air Jordan 1 'Chicago'"
+                    position="0 2.2 0"
+                    align="center"
+                    color="#DC143C"
+                    font="roboto"
+                    width="6"
+                    animation__fadein="property: opacity; from: 0; to: 1; dur: 1000; delay: 500"
+                    animation__scale="property: scale; from: 0.5 0.5 0.5; to: 1 1 1; dur: 800; delay: 500; easing: easeOutBack">
+                </a-text>
+                
+                <!-- Año y diseñador -->
+                <a-text
+                    id="year-designer"
+                    value="1985 • Peter Moore"
+                    position="0 1.8 0"
+                    align="center"
+                    color="#FFFFFF"
+                    font="roboto"
+                    width="4"
+                    animation__slidein="property: position; from: -2 1.8 0; to: 0 1.8 0; dur: 800; delay: 1000; easing: easeOutQuad">
+                </a-text>
+                
+                <!-- Fact icónico -->
+                <a-text
+                    id="iconic-fact"
+                    value="The shoe that started the sneaker revolution"
+                    position="0 1.4 0"
+                    align="center"
+                    color="#FFD700"
+                    font="roboto"
+                    width="4"
+                    animation__appear="property: opacity; from: 0; to: 1; dur: 1000; delay: 1500">
+                </a-text>
+                
+                <!-- Botón interactivo -->
+                <a-box
+                    id="more-info-btn"
+                    class="clickable"
+                    position="0 0.8 0"
+                    width="2.5"
+                    height="0.4"
+                    depth="0.1"
+                    color="#DC143C"
+                    opacity="0.9"
+                    animation__appear="property: opacity; from: 0; to: 0.9; dur: 500; delay: 2000">
+                    
+                    <a-text
+                        value="TAP PARA MÁS INFO"
+                        position="0 0 0.06"
+                        align="center"
+                        color="#FFFFFF"
+                        font="roboto"
+                        width="4">
+                    </a-text>
+                </a-box>
+                
+                <!-- Panel de detalles (oculto inicialmente) -->
+                <a-entity id="details-panel" visible="false" position="0 0.2 0">
+                    <a-plane
+                        width="3.5"
+                        height="2.5"
+                        color="#1a1a1a"
+                        opacity="0.95"
+                        material="transparent: true">
+                    </a-plane>
+                    
+                    <a-text
+                        id="details-text"
+                        value="💰 Precio original: $65 ($180 hoy)
+📈 Ventas primer año: $126M
+🏀 Cambió el basketball para siempre
+👟 Casi se va a Adidas
+🔥 Creó la cultura sneaker moderna"
+                        position="0 0 0.01"
+                        align="center"
+                        color="#FFFFFF"
+                        font="roboto"
+                        width="3"
+                        line-height="1.4">
+                    </a-text>
+                    
+                    <!-- Botón cerrar -->
+                    <a-circle
+                        id="close-btn"
+                        class="clickable"
+                        position="1.5 1 0.02"
+                        radius="0.2"
+                        color="#DC143C"
+                        opacity="0.8">
+                        <a-text
+                            value="✕"
+                            position="0 0 0.01"
+                            align="center"
+                            color="#FFFFFF"
+                            font="roboto"
+                            width="6">
+                        </a-text>
+                    </a-circle>
+                </a-entity>
+                
+                <!-- Brand credit -->
+                <a-text
+                    id="brand-credit"
+                    value="The Hype Way"
+                    position="0 -0.5 0"
+                    align="center"
+                    color="#FFFFFF"
+                    font="roboto"
+                    width="2"
+                    opacity="0.7"
+                    animation__logoappear="property: opacity; from: 0; to: 0.7; dur: 500; delay: 3000">
+                </a-text>
+                
+            </a-entity>
+        </a-marker>
+        
+        <!-- Cámara -->
+        <a-entity camera></a-entity>
+    </a-scene>
+    
+    <!-- Share Button -->
+    <button id="share-btn" class="share-button hidden">
+        📱 Compartir
+    </button>
+    
+    <!-- Scripts -->
+    <script src="assets/js/main.js"></script>
+</body>
+</html>
