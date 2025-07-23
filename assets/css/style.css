@@ -449,3 +449,39 @@ a-scene {
     outline: 2px solid #FFD700;
     outline-offset: 2px;
 }
+
+/* FORCE HIDE OVERLAYS WHEN AR STARTS */
+body.ar-started #loading-screen,
+body.ar-started #instructions,
+body.ar-started .overlay {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    z-index: -9999 !important;
+    pointer-events: none !important;
+    position: absolute !important;
+    left: -9999px !important;
+    top: -9999px !important;
+}
+
+body.ar-started a-scene {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    z-index: 1 !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+}
+
+/* Emergency override for iOS */
+@supports (-webkit-appearance: none) {
+    body.ar-started #loading-screen,
+    body.ar-started #instructions,
+    body.ar-started .overlay {
+        -webkit-transform: translateX(-9999px) !important;
+        transform: translateX(-9999px) !important;
+    }
+}
