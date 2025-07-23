@@ -16,7 +16,46 @@ class TheHypeWayAR {
         document.addEventListener('DOMContentLoaded', () => {
             this.setupEventListeners();
             this.setupAR();
+            // Force show instructions after DOM loads
+            this.forceShowInstructions();
         });
+    }
+    
+    forceShowInstructions() {
+        // Force show instructions after 2 seconds to prevent infinite loading
+        setTimeout(() => {
+            const loadingScreen = document.getElementById('loading-screen');
+            const instructions = document.getElementById('instructions');
+            
+            console.log('🔧 Checking loading screen...', loadingScreen ? 'found' : 'not found');
+            
+            if (loadingScreen && loadingScreen.style.display !== 'none') {
+                console.log('🔧 Force hiding loading screen');
+                loadingScreen.style.opacity = '0';
+                setTimeout(() => {
+                    loadingScreen.style.display = 'none';
+                }, 500);
+            }
+            
+            if (instructions && instructions.style.display === 'none') {
+                console.log('🔧 Force showing instructions');
+                instructions.style.display = 'flex';
+                instructions.style.opacity = '1';
+            }
+        }, 2000);
+        
+        // Also try immediately when DOM loads
+        setTimeout(() => {
+            const loadingScreen = document.getElementById('loading-screen');
+            const instructions = document.getElementById('instructions');
+            
+            if (loadingScreen) {
+                loadingScreen.style.opacity = '0.5';
+            }
+            if (instructions) {
+                instructions.style.opacity = '1';
+            }
+        }, 500);
     }
     
     setupEventListeners() {
@@ -24,8 +63,11 @@ class TheHypeWayAR {
         const startBtn = document.getElementById('start-ar');
         if (startBtn) {
             startBtn.addEventListener('click', () => {
+                console.log('🎯 Start AR button clicked');
                 this.startARExperience();
             });
+        } else {
+            console.log('❌ Start button not found');
         }
         
         // Share button
@@ -44,23 +86,30 @@ class TheHypeWayAR {
     
     setupAR() {
         // Wait for A-Frame to initialize
-        document.querySelector('a-scene').addEventListener('loaded', () => {
-            this.scene = document.querySelector('a-scene');
-            this.marker = document.querySelector('#jordan-1-marker');
-            
-            // Marker events
-            this.marker.addEventListener('markerFound', () => {
-                console.log('🎯 Marker detectado!');
-                this.onMarkerFound();
+        const scene = document.querySelector('a-scene');
+        if (scene) {
+            scene.addEventListener('loaded', () => {
+                this.scene = scene;
+                this.marker = document.querySelector('#jordan-1-marker');
+                
+                if (this.marker) {
+                    // Marker events
+                    this.marker.addEventListener('markerFound', () => {
+                        console.log('🎯 Marker detectado!');
+                        this.onMarkerFound();
+                    });
+                    
+                    this.marker.addEventListener('markerLost', () => {
+                        console.log('😞 Marker perdido');
+                        this.onMarkerLost();
+                    });
+                }
+                
+                console.log('✅ AR Scene initialized');
             });
-            
-            this.marker.addEventListener('markerLost', () => {
-                console.log('😞 Marker perdido');
-                this.onMarkerLost();
-            });
-            
-            console.log('✅ AR Scene initialized');
-        });
+        } else {
+            console.log('❌ A-Frame scene not found');
+        }
     }
     
     setupARInteractions() {
@@ -68,6 +117,7 @@ class TheHypeWayAR {
         const moreInfoBtn = document.querySelector('#more-info-btn');
         if (moreInfoBtn) {
             moreInfoBtn.addEventListener('click', () => {
+                console.log('🔍 More info button clicked');
                 this.toggleDetails();
             });
         }
@@ -76,6 +126,7 @@ class TheHypeWayAR {
         const closeBtn = document.querySelector('#close-btn');
         if (closeBtn) {
             closeBtn.addEventListener('click', () => {
+                console.log('❌ Close button clicked');
                 this.hideDetails();
             });
         }
@@ -85,6 +136,8 @@ class TheHypeWayAR {
         // Hide instructions and loading
         const instructions = document.getElementById('instructions');
         const loadingScreen = document.getElementById('loading-screen');
+        
+        console.log('🚀 Starting AR Experience...');
         
         if (instructions) {
             instructions.style.opacity = '0';
@@ -100,6 +153,20 @@ class TheHypeWayAR {
             }, 500);
         }
         
+        // Request camera permissions explicitly
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+            navigator.mediaDevices.getUserMedia({ video: true })
+                .then(stream => {
+                    console.log('📹 Camera access granted');
+                    // Stop the stream immediately as A-Frame will handle it
+                    stream.getTracks().forEach(track => track.stop());
+                })
+                .catch(err => {
+                    console.error('❌ Camera access denied:', err);
+                    this.showNotification('⚠️ Necesitas permitir acceso a la cámara');
+                });
+        }
+        
         console.log('🚀 AR Experience started');
     }
     
@@ -111,6 +178,9 @@ class TheHypeWayAR {
         if (shareBtn) {
             shareBtn.classList.remove('hidden');
         }
+        
+        // Show success notification
+        this.showNotification('🎯 ¡Marker detectado! Mira el contenido AR');
         
         console.log('✨ AR Content activated');
     }
@@ -162,23 +232,52 @@ class TheHypeWayAR {
             url: window.location.href
         };
         
+        console.log('📱 Attempting to share...');
+        
         // Native sharing if available
         if (navigator.share) {
             navigator.share(shareData)
-                .then(() => console.log('✅ Shared successfully'))
-                .catch(err => console.log('❌ Error sharing:', err));
+                .then(() => {
+                    console.log('✅ Shared successfully');
+                    this.showNotification('✅ ¡Compartido exitosamente!');
+                })
+                .catch(err => {
+                    console.log('❌ Error sharing:', err);
+                    this.fallbackShare(shareData);
+                });
         } else {
-            // Fallback: copy to clipboard
-            const textToCopy = `${shareData.text} ${shareData.url}`;
+            this.fallbackShare(shareData);
+        }
+    }
+    
+    fallbackShare(shareData) {
+        // Fallback: copy to clipboard
+        const textToCopy = `${shareData.text} ${shareData.url}`;
+        
+        if (navigator.clipboard) {
             navigator.clipboard.writeText(textToCopy).then(() => {
-                this.showNotification('¡Enlace copiado al portapapeles!');
+                this.showNotification('📋 ¡Enlace copiado al portapapeles!');
+            }).catch(() => {
+                this.showNotification('❌ No se pudo copiar. Comparte manualmente.');
             });
+        } else {
+            // Ultimate fallback for older browsers
+            this.showNotification('💡 Comparte: ' + shareData.url);
         }
     }
     
     showNotification(message) {
+        // Remove any existing notifications first
+        const existingNotifications = document.querySelectorAll('.ar-notification');
+        existingNotifications.forEach(notif => {
+            if (document.body.contains(notif)) {
+                document.body.removeChild(notif);
+            }
+        });
+        
         // Create temporary notification
         const notification = document.createElement('div');
+        notification.className = 'ar-notification';
         notification.style.cssText = `
             position: fixed;
             top: 20px;
@@ -192,11 +291,20 @@ class TheHypeWayAR {
             font-size: 14px;
             font-weight: bold;
             box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            max-width: 90%;
+            text-align: center;
         `;
         notification.textContent = message;
         document.body.appendChild(notification);
         
-        // Remove after 3 seconds
+        // Animate in
+        setTimeout(() => {
+            notification.style.opacity = '1';
+        }, 100);
+        
+        // Remove after 4 seconds
         setTimeout(() => {
             notification.style.opacity = '0';
             setTimeout(() => {
@@ -204,15 +312,31 @@ class TheHypeWayAR {
                     document.body.removeChild(notification);
                 }
             }, 300);
-        }, 3000);
+        }, 4000);
     }
 }
 
 // Initialize the AR experience
+console.log('🔥 Initializing The Hype Way AR...');
 const theHypeWayAR = new TheHypeWayAR();
 
-// Add click listeners to A-Frame elements
+// Backup initialization if the class fails
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('📱 DOM Content Loaded');
+    
+    // Backup force show instructions
+    setTimeout(() => {
+        const loadingScreen = document.getElementById('loading-screen');
+        const instructions = document.getElementById('instructions');
+        
+        if (loadingScreen && instructions) {
+            console.log('🔧 Backup: Force showing instructions');
+            loadingScreen.style.display = 'none';
+            instructions.style.display = 'flex';
+        }
+    }, 3000);
+    
+    // Add click listeners to A-Frame elements
     setTimeout(() => {
         const clickableElements = document.querySelectorAll('.clickable');
         clickableElements.forEach(el => {
@@ -220,5 +344,24 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.log('🖱️ Clicked:', this.id);
             });
         });
+        
+        // Backup start button listener
+        const startBtn = document.getElementById('start-ar');
+        if (startBtn) {
+            startBtn.addEventListener('click', () => {
+                console.log('🔧 Backup start button clicked');
+                const loadingScreen = document.getElementById('loading-screen');
+                const instructions = document.getElementById('instructions');
+                
+                if (loadingScreen) loadingScreen.style.display = 'none';
+                if (instructions) instructions.style.display = 'none';
+            });
+        }
     }, 4000);
 });
+
+// Debug info
+console.log('🔍 Debug Info:');
+console.log('- User Agent:', navigator.userAgent);
+console.log('- URL:', window.location.href);
+console.log('- Screen size:', window.screen.width + 'x' + window.screen.height);
