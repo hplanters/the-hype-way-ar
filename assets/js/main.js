@@ -1,6 +1,6 @@
-// The Hype Way AR - WORKING VERSION + SIMPLE TRACKING FIX
+// The Hype Way AR - WORKING VERSION + AR Z-INDEX FIX
 
-console.log('🔥 Loading Working AR Script');
+console.log('🔥 Loading Working AR Script with Z-Index Fix');
 
 // Global variables
 let isARStarted = false;
@@ -139,7 +139,7 @@ function forceSceneVisible() {
         scene.style.left = '0';
         scene.style.width = '100vw';
         scene.style.height = '100vh';
-        scene.style.zIndex = '1';
+        scene.style.zIndex = '5'; // Changed from 1 to 5
     }
     
     // Force canvas full screen
@@ -151,6 +151,7 @@ function forceSceneVisible() {
             canvas.style.position = 'fixed';
             canvas.style.top = '0';
             canvas.style.left = '0';
+            canvas.style.zIndex = '5'; // Add z-index
         }
     }, 500);
     
@@ -165,9 +166,46 @@ function forceSceneVisible() {
             video.style.position = 'fixed';
             video.style.top = '0';
             video.style.left = '0';
-            video.style.zIndex = '1';
+            video.style.zIndex = '1'; // Video must be below AR content
         }
     }, 1000);
+    
+    // NEW: Force AR content to be visible above camera
+    setTimeout(() => {
+        console.log('🔧 Forcing AR content z-index');
+        
+        const arContent = document.querySelector('#ar-content');
+        if (arContent) {
+            console.log('✅ AR content container found - forcing visibility');
+            arContent.style.zIndex = '100';
+            arContent.style.position = 'relative';
+        }
+        
+        // Force all AR text elements to be visible
+        const arTexts = document.querySelectorAll('a-text');
+        arTexts.forEach((element, index) => {
+            element.style.zIndex = '100';
+            element.style.position = 'relative';
+            console.log(`✅ AR text element ${index + 1} z-index forced`);
+        });
+        
+        // Force AR boxes and interactive elements
+        const arBoxes = document.querySelectorAll('a-box, .clickable');
+        arBoxes.forEach((element, index) => {
+            element.style.zIndex = '150';
+            element.style.position = 'relative';
+            console.log(`✅ AR interactive element ${index + 1} z-index forced`);
+        });
+        
+        // Force AR planes (backgrounds)
+        const arPlanes = document.querySelectorAll('a-plane');
+        arPlanes.forEach((element, index) => {
+            element.style.zIndex = '90';
+            element.style.position = 'relative';
+            console.log(`✅ AR plane element ${index + 1} z-index forced`);
+        });
+        
+    }, 1500);
 }
 
 function requestCamera() {
@@ -215,6 +253,9 @@ function setupMarkerEvents() {
             console.log('🎯 Marker found!');
             showNotification('✨ ¡Marker detectado! Contenido AR visible');
             
+            // Force AR content visibility when marker is found
+            forceARContentVisibility();
+            
             // Show share button
             const shareBtn = document.getElementById('share-btn');
             if (shareBtn) {
@@ -240,6 +281,41 @@ function setupMarkerEvents() {
         console.log('❌ Marker not found, retrying...');
         setTimeout(setupMarkerEvents, 1000);
     }
+}
+
+function forceARContentVisibility() {
+    console.log('🔧 Forcing AR content visibility after marker detection');
+    
+    // Force visibility for all AR elements
+    const arElements = document.querySelectorAll('#ar-content a-text, #ar-content a-box, #ar-content a-plane, #ar-content a-circle');
+    arElements.forEach((element, index) => {
+        element.style.opacity = '1';
+        element.style.visibility = 'visible';
+        element.style.display = 'block';
+        element.style.zIndex = '100';
+        element.style.position = 'relative';
+        console.log(`✅ AR element ${index + 1} forced visible`);
+    });
+    
+    // Specifically target main AR text elements
+    const mainElements = [
+        '#title-text',
+        '#year-designer', 
+        '#iconic-fact',
+        '#more-info-btn',
+        '#brand-credit'
+    ];
+    
+    mainElements.forEach(selector => {
+        const element = document.querySelector(selector);
+        if (element) {
+            element.style.opacity = '1';
+            element.style.visibility = 'visible';
+            element.style.zIndex = '100';
+            element.style.position = 'relative';
+            console.log(`✅ ${selector} forced visible`);
+        }
+    });
 }
 
 function setupARInteractions() {
@@ -284,6 +360,13 @@ function showDetails() {
     const detailsPanel = document.querySelector('#details-panel');
     if (detailsPanel) {
         detailsPanel.setAttribute('visible', 'true');
+        
+        // Force details panel visibility
+        detailsPanel.style.opacity = '1';
+        detailsPanel.style.visibility = 'visible';
+        detailsPanel.style.zIndex = '200';
+        detailsPanel.style.position = 'relative';
+        
         detailsVisible = true;
         console.log('📖 Details shown');
         showNotification('📖 Información ampliada');
@@ -344,6 +427,57 @@ function showNotification(message) {
     }, 4000);
 }
 
+// Setup share functionality
+function setupShareButton() {
+    const shareBtn = document.getElementById('share-btn');
+    if (shareBtn && !shareBtn.hasAttribute('data-setup')) {
+        shareBtn.setAttribute('data-setup', 'true');
+        
+        shareBtn.addEventListener('click', function() {
+            console.log('📱 Share button clicked');
+            shareExperience();
+        });
+        
+        console.log('✅ Share button setup');
+    }
+}
+
+function shareExperience() {
+    const shareData = {
+        title: 'The Hype Way AR - Air Jordan 1 Chicago',
+        text: '🔥 Acabo de descubrir la historia del Air Jordan 1 Chicago en AR! La cultura sneaker cobra vida con The Hype Way.',
+        url: window.location.href
+    };
+    
+    if (navigator.share) {
+        navigator.share(shareData)
+            .then(() => {
+                console.log('✅ Share successful');
+                showNotification('✅ ¡Compartido exitosamente!');
+            })
+            .catch(err => {
+                console.log('❌ Share failed:', err);
+                fallbackShare(shareData);
+            });
+    } else {
+        fallbackShare(shareData);
+    }
+}
+
+function fallbackShare(shareData) {
+    const textToCopy = `${shareData.text} ${shareData.url}`;
+    
+    if (navigator.clipboard) {
+        navigator.clipboard.writeText(textToCopy).then(() => {
+            showNotification('📋 ¡Enlace copiado al portapapeles!');
+        }).catch(() => {
+            showNotification('💡 Comparte: ' + shareData.url);
+        });
+    } else {
+        showNotification('💡 Comparte: ' + shareData.url);
+    }
+}
+
 // iOS specific fixes
 if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
     console.log('📱 iOS device detected');
@@ -362,7 +496,22 @@ if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
             e.preventDefault();
         }
     }, { passive: false });
+    
+    // iOS specific AR content fix
+    setTimeout(() => {
+        if (isARStarted) {
+            const arElements = document.querySelectorAll('a-text, a-box, a-plane');
+            arElements.forEach(element => {
+                element.style.webkitTransform = 'translateZ(0)';
+                element.style.transform = 'translateZ(0)';
+            });
+            console.log('📱 iOS AR content transform applied');
+        }
+    }, 3000);
 }
+
+// Setup share button when DOM is ready
+setTimeout(setupShareButton, 3000);
 
 // Emergency backup - if nothing works, this will
 setTimeout(() => {
@@ -381,4 +530,20 @@ setTimeout(() => {
     }
 }, 5000);
 
-console.log('🔥 Working AR script loaded');
+// Debug: Check AR content visibility every 10 seconds when AR is active
+setInterval(() => {
+    if (isARStarted) {
+        const arContent = document.querySelector('#ar-content');
+        const titleText = document.querySelector('#title-text');
+        const marker = document.querySelector('#jordan-1-marker');
+        
+        console.log('🔍 AR Debug Check:', {
+            arContentExists: !!arContent,
+            titleTextExists: !!titleText,
+            markerExists: !!marker,
+            markerVisible: marker ? marker.object3D.visible : false
+        });
+    }
+}, 10000);
+
+console.log('🔥 Working AR script with Z-Index fix loaded');
