@@ -1,16 +1,18 @@
-/* Reset y base styles */
-:root {
-    --vh: 1vh;
-}
+/* MINIMAL CSS - GUARANTEED TO WORK */
 
+/* Reset */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
 
+:root {
+    --vh: 1vh;
+}
+
 html, body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
     background: #000;
     overflow: hidden;
     user-select: none;
@@ -20,7 +22,6 @@ html, body {
     position: fixed;
     -webkit-user-select: none;
     -webkit-touch-callout: none;
-    -webkit-text-size-adjust: 100%;
 }
 
 /* Loading Screen */
@@ -29,20 +30,17 @@ html, body {
     top: 0;
     left: 0;
     width: 100%;
-    height: 100vh;
-    height: calc(var(--vh, 1vh) * 100);
-    background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
+    height: 100%;
+    background: linear-gradient(135deg, #000 0%, #1a1a1a 100%);
     display: flex;
     justify-content: center;
     align-items: center;
     z-index: 1000;
-    transition: opacity 0.5s ease;
 }
 
 .loading-content {
     text-align: center;
     color: white;
-    max-width: 300px;
     padding: 20px;
 }
 
@@ -63,7 +61,6 @@ html, body {
     font-size: 16px;
     opacity: 0.8;
     margin-bottom: 30px;
-    line-height: 1.4;
 }
 
 .loading-spinner {
@@ -76,20 +73,18 @@ html, body {
     margin: 0 auto;
 }
 
-/* Instructions Overlay */
+/* Instructions */
 .overlay {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
-    height: 100vh;
-    height: calc(var(--vh, 1vh) * 100);
+    height: 100%;
     background: rgba(0, 0, 0, 0.9);
     display: flex;
     justify-content: center;
     align-items: center;
     z-index: 999;
-    backdrop-filter: blur(10px);
     padding: 20px;
 }
 
@@ -130,10 +125,6 @@ html, body {
     font-weight: bold;
 }
 
-.instruction-content a:hover {
-    text-decoration: underline;
-}
-
 .ios-note {
     font-size: 12px;
     opacity: 0.8;
@@ -153,23 +144,15 @@ html, body {
     font-size: 16px;
     font-weight: bold;
     cursor: pointer;
-    transition: all 0.3s ease;
     width: 100%;
-    min-height: 44px; /* iOS touch target minimum */
+    min-height: 44px;
     box-shadow: 0 4px 15px rgba(220, 20, 60, 0.3);
     -webkit-appearance: none;
     -webkit-tap-highlight-color: transparent;
 }
 
-.cta-button:hover,
 .cta-button:active {
-    transform: translateY(-1px);
-    box-shadow: 0 6px 20px rgba(220, 20, 60, 0.5);
-}
-
-.cta-button:focus {
-    outline: 2px solid #FFD700;
-    outline-offset: 2px;
+    transform: scale(0.95);
 }
 
 /* Share Button */
@@ -186,51 +169,23 @@ html, body {
     font-weight: bold;
     cursor: pointer;
     z-index: 998;
-    transition: all 0.3s ease;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-    min-height: 44px; /* iOS touch target minimum */
+    min-height: 44px;
     -webkit-appearance: none;
-    -webkit-tap-highlight-color: transparent;
-}
-
-.share-button:hover,
-.share-button:active {
-    transform: translateY(-1px);
-    box-shadow: 0 6px 20px rgba(220, 20, 60, 0.4);
 }
 
 .hidden {
     display: none !important;
 }
 
-/* AR Scene */
+/* AR Scene - Base */
 a-scene {
-    width: 100vw !important;
-    height: 100vh !important;
-    height: calc(var(--vh, 1vh) * 100) !important;
-    position: fixed !important;
-    top: 0 !important;
-    left: 0 !important;
-}
-
-/* AR Notifications */
-.ar-notification {
+    width: 100vw;
+    height: 100vh;
     position: fixed;
-    top: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: #DC143C;
-    color: white;
-    padding: 12px 24px;
-    border-radius: 25px;
-    z-index: 1001;
-    font-size: 14px;
-    font-weight: bold;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-    max-width: 90%;
-    text-align: center;
-    opacity: 0;
-    transition: opacity 0.3s ease;
+    top: 0;
+    left: 0;
+    z-index: 0;
 }
 
 /* Animations */
@@ -240,52 +195,78 @@ a-scene {
 }
 
 @keyframes pulse {
-    0%, 100% { 
-        opacity: 1; 
-        transform: scale(1);
-    }
-    50% { 
-        opacity: 0.6; 
-        transform: scale(1.05);
-    }
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.6; transform: scale(1.05); }
 }
 
-@keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+/* Hide A-Frame UI */
+.a-enter-vr-button,
+.a-orientation-modal,
+.a-enter-ar-button {
+    display: none !important;
 }
 
-@keyframes fadeOut {
-    from {
-        opacity: 1;
-    }
-    to {
-        opacity: 0;
-        visibility: hidden;
-    }
+/* ===== AR ACTIVE STATE ===== */
+/* CRITICAL: This is what makes it work */
+
+body.ar-active #loading-screen,
+body.ar-active #instructions,
+body.ar-active .overlay {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    z-index: -9999 !important;
+    pointer-events: none !important;
 }
 
-/* iPhone specific styles */
-@media only screen and (max-device-width: 896px) and (-webkit-min-device-pixel-ratio: 2) {
+body.ar-active {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    overflow: hidden !important;
+}
+
+body.ar-active a-scene {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    z-index: 1 !important;
+}
+
+body.ar-active a-scene canvas {
+    width: 100vw !important;
+    height: 100vh !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+}
+
+body.ar-active video {
+    width: 100vw !important;
+    height: 100vh !important;
+    object-fit: cover !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    z-index: 1 !important;
+}
+
+/* Mobile responsive */
+@media (max-width: 480px) {
     .instruction-content {
-        font-size: 16px;
-        max-width: 90vw;
+        margin: 15px;
         padding: 25px;
     }
     
     .instruction-content h3 {
         font-size: 20px;
-    }
-    
-    .instruction-content li {
-        font-size: 15px;
-        margin-bottom: 12px;
     }
     
     .cta-button {
@@ -294,283 +275,27 @@ a-scene {
         min-height: 50px;
     }
     
-    .loading-content h2 {
-        font-size: 26px;
-    }
-    
     .hype-logo {
-        font-size: 55px;
+        font-size: 50px;
     }
 }
 
-/* Small iPhone (SE, 12 mini) */
-@media only screen and (max-width: 375px) {
-    .instruction-content {
-        padding: 20px;
-        margin: 15px;
-    }
-    
-    .instruction-content h3 {
-        font-size: 18px;
-    }
-    
-    .instruction-content li {
-        font-size: 14px;
-    }
-    
-    .loading-content {
-        padding: 15px;
-    }
-    
-    .hype-logo {
-        font-size: 45px;
-        margin-bottom: 15px;
-    }
-    
-    .loading-content h2 {
-        font-size: 22px;
-    }
-    
-    .share-button {
-        bottom: 15px;
-        right: 15px;
-        padding: 10px 16px;
-        font-size: 12px;
-        min-height: 40px;
-    }
-}
-
-/* Landscape orientation on iPhone */
-@media (orientation: landscape) and (max-height: 500px) {
-    .instruction-content {
-        max-height: 85vh;
-        overflow-y: auto;
-        padding: 20px;
-        margin: 10px;
-    }
-    
-    .loading-content {
-        transform: scale(0.8);
-    }
-    
-    .hype-logo {
-        font-size: 35px;
-        margin-bottom: 10px;
-    }
-    
-    .loading-content h2 {
-        font-size: 20px;
-        margin-bottom: 8px;
-    }
-    
-    .loading-content p {
-        font-size: 14px;
-        margin-bottom: 20px;
-    }
-}
-
-/* Hide A-Frame default UI */
-.a-enter-vr-button,
-.a-orientation-modal,
-.a-enter-ar-button {
-    display: none !important;
-}
-
-/* iOS Safari specific fixes */
+/* iOS Safari fixes */
 @supports (-webkit-appearance: none) {
     body {
-        -webkit-user-select: none;
-        -webkit-touch-callout: none;
         -webkit-text-size-adjust: 100%;
         -webkit-overflow-scrolling: touch;
     }
     
-    .cta-button,
-    .share-button {
-        -webkit-appearance: none;
-        -webkit-tap-highlight-color: transparent;
-    }
-    
-    /* Fix for iOS viewport units */
     #loading-screen,
     .overlay,
     a-scene {
         height: 100vh;
         height: -webkit-fill-available;
     }
-}
-
-/* High contrast mode support */
-@media (prefers-contrast: high) {
-    .instruction-content {
-        border: 3px solid #DC143C;
-        background: #000;
-    }
     
-    .cta-button {
-        border: 2px solid white;
-    }
-    
-    .ios-note {
-        background: rgba(255, 255, 255, 0.1);
-        border-left: 3px solid #FFD700;
-    }
-}
-
-/* Reduced motion support */
-@media (prefers-reduced-motion: reduce) {
-    .loading-spinner,
-    .hype-logo {
-        animation: none;
-    }
-    
-    .cta-button:hover,
-    .share-button:hover {
-        transform: none;
-    }
-    
-    * {
-        transition: none !important;
-        animation: none !important;
-    }
-}
-
-/* Dark mode support */
-@media (prefers-color-scheme: dark) {
-    .instruction-content {
-        background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
-        border-color: #DC143C;
-    }
-}
-
-/* Focus visible for accessibility */
-.cta-button:focus-visible,
-.share-button:focus-visible {
-    outline: 2px solid #FFD700;
-    outline-offset: 2px;
-}
-
-/* ============================================= */
-/* CRITICAL AR FIXES - MUST BE AT THE END */
-/* ============================================= */
-
-/* FORCE HIDE OVERLAYS WHEN AR STARTS */
-body.ar-started #loading-screen,
-body.ar-started #instructions,
-body.ar-started .overlay,
-body.ar-started .instruction-content {
-    display: none !important;
-    visibility: hidden !important;
-    opacity: 0 !important;
-    z-index: -9999 !important;
-    pointer-events: none !important;
-    position: absolute !important;
-    left: -9999px !important;
-    top: -9999px !important;
-    transform: translateX(-9999px) !important;
-    width: 0 !important;
-    height: 0 !important;
-    overflow: hidden !important;
-}
-
-/* FORCE FULL SCREEN AR SCENE AND CAMERA */
-body.ar-started a-scene,
-body.ar-started a-scene canvas {
-    display: block !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-    z-index: 1 !important;
-    position: fixed !important;
-    top: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
-    bottom: 0 !important;
-    width: 100vw !important;
-    height: 100vh !important;
-    height: calc(var(--vh, 1vh) * 100) !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    border: none !important;
-    outline: none !important;
-}
-
-/* FORCE FULL SCREEN VIDEO (CAMERA FEED) */
-body.ar-started video {
-    display: block !important;
-    visibility: visible !important;
-    width: 100vw !important;
-    height: 100vh !important;
-    height: calc(var(--vh, 1vh) * 100) !important;
-    object-fit: cover !important;
-    position: fixed !important;
-    top: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
-    bottom: 0 !important;
-    z-index: 1 !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    border: none !important;
-    outline: none !important;
-}
-
-/* Emergency override for iOS WebKit */
-@supports (-webkit-appearance: none) {
-    body.ar-started #loading-screen,
-    body.ar-started #instructions,
-    body.ar-started .overlay,
-    body.ar-started .instruction-content {
-        -webkit-transform: translateX(-9999px) translateY(-9999px) !important;
-        transform: translateX(-9999px) translateY(-9999px) !important;
-        -webkit-clip-path: inset(100%) !important;
-        clip-path: inset(100%) !important;
-    }
-    
-    body.ar-started a-scene,
-    body.ar-started a-scene canvas,
-    body.ar-started video {
-        -webkit-transform: none !important;
-        transform: none !important;
-        -webkit-clip-path: none !important;
-        clip-path: none !important;
-    }
-}
-
-/* Force override for stubborn elements */
-body.ar-started * {
-    max-width: none !important;
-    max-height: none !important;
-}
-
-body.ar-started *:not(a-scene):not(canvas):not(video):not(.ar-notification):not(.share-button) {
-    z-index: -1 !important;
-}
-
-/* Ensure AR content is always on top */
-body.ar-started .ar-notification {
-    z-index: 10001 !important;
-}
-
-body.ar-started .share-button {
-    z-index: 10000 !important;
-}
-
-/* Mobile viewport fix for AR */
-@media screen and (max-width: 768px) {
-    body.ar-started {
-        position: fixed !important;
-        top: 0 !important;
-        left: 0 !important;
-        width: 100vw !important;
-        height: 100vh !important;
-        overflow: hidden !important;
-    }
-    
-    body.ar-started a-scene,
-    body.ar-started video {
-        transform: translateZ(0) !important;
-        -webkit-transform: translateZ(0) !important;
-        backface-visibility: hidden !important;
-        -webkit-backface-visibility: hidden !important;
+    body.ar-active video {
+        -webkit-transform: translateZ(0);
+        transform: translateZ(0);
     }
 }
