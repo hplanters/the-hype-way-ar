@@ -1,6 +1,6 @@
-// The Hype Way AR - WORKING VERSION + AR Z-INDEX FIX
+// The Hype Way AR - FINAL COMPLETE VERSION
 
-console.log('🔥 Loading Working AR Script with Z-Index Fix');
+console.log('🔥 Loading Final AR Script with Enhanced Interactions');
 
 // Global variables
 let isARStarted = false;
@@ -139,7 +139,7 @@ function forceSceneVisible() {
         scene.style.left = '0';
         scene.style.width = '100vw';
         scene.style.height = '100vh';
-        scene.style.zIndex = '5'; // Changed from 1 to 5
+        scene.style.zIndex = '5';
     }
     
     // Force canvas full screen
@@ -148,10 +148,14 @@ function forceSceneVisible() {
         if (canvas) {
             canvas.style.width = '100vw';
             canvas.style.height = '100vh';
+            canvas.style.minWidth = '100vw';
+            canvas.style.minHeight = '100vh';
             canvas.style.position = 'fixed';
             canvas.style.top = '0';
             canvas.style.left = '0';
-            canvas.style.zIndex = '5'; // Add z-index
+            canvas.style.zIndex = '5';
+            canvas.style.objectFit = 'cover';
+            canvas.style.objectPosition = 'center';
         }
     }, 500);
     
@@ -162,15 +166,23 @@ function forceSceneVisible() {
             console.log('🔧 Forcing video full screen');
             video.style.width = '100vw';
             video.style.height = '100vh';
+            video.style.minWidth = '100vw';
+            video.style.minHeight = '100vh';
             video.style.objectFit = 'cover';
+            video.style.objectPosition = 'center';
             video.style.position = 'fixed';
             video.style.top = '0';
             video.style.left = '0';
-            video.style.zIndex = '1'; // Video must be below AR content
+            video.style.right = '0';
+            video.style.bottom = '0';
+            video.style.zIndex = '1';
+            video.style.margin = '0';
+            video.style.padding = '0';
+            video.style.border = 'none';
         }
     }, 1000);
     
-    // NEW: Force AR content to be visible above camera
+    // Force AR content to be visible above camera
     setTimeout(() => {
         console.log('🔧 Forcing AR content z-index');
         
@@ -319,36 +331,149 @@ function forceARContentVisibility() {
 }
 
 function setupARInteractions() {
-    // More info button - only set up once
+    console.log('🔧 Setting up AR interactions');
+    
+    // More info button - enhanced setup with multiple event types
+    setTimeout(() => {
+        const moreInfoBtn = document.querySelector('#more-info-btn');
+        if (moreInfoBtn && !moreInfoBtn.hasAttribute('data-setup')) {
+            moreInfoBtn.setAttribute('data-setup', 'true');
+            
+            console.log('✅ More info button found, setting up enhanced interactions...');
+            
+            // Method 1: Click event
+            moreInfoBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('🔍 More info CLICKED');
+                toggleDetails();
+            });
+            
+            // Method 2: Touch events for mobile
+            moreInfoBtn.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                moreInfoBtn.style.transform = 'scale(0.95)';
+                console.log('🔍 More info TOUCH START');
+            });
+            
+            moreInfoBtn.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                moreInfoBtn.style.transform = 'scale(1)';
+                console.log('🔍 More info TOUCH END');
+                toggleDetails();
+            });
+            
+            // Method 3: Mouse events for desktop/testing
+            moreInfoBtn.addEventListener('mousedown', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('🔍 More info MOUSE DOWN');
+                toggleDetails();
+            });
+            
+            // Method 4: A-Frame specific events
+            if (moreInfoBtn.addEventListener) {
+                moreInfoBtn.addEventListener('raycaster-intersected', () => {
+                    console.log('🔍 More info RAYCASTER INTERSECTED');
+                });
+                
+                moreInfoBtn.addEventListener('raycaster-intersected-cleared', () => {
+                    console.log('🔍 More info RAYCASTER CLEARED');
+                });
+            }
+            
+            // Force clickable properties
+            moreInfoBtn.style.cursor = 'pointer';
+            moreInfoBtn.style.userSelect = 'none';
+            moreInfoBtn.style.webkitUserSelect = 'none';
+            moreInfoBtn.style.touchAction = 'manipulation';
+            moreInfoBtn.style.pointerEvents = 'auto';
+            
+            console.log('✅ More info button fully enhanced setup complete');
+        } else {
+            console.log('❌ More info button not found or already setup');
+        }
+        
+        // Close button setup
+        const closeBtn = document.querySelector('#close-btn');
+        if (closeBtn && !closeBtn.hasAttribute('data-setup')) {
+            closeBtn.setAttribute('data-setup', 'true');
+            
+            closeBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('❌ Close CLICKED');
+                hideDetails();
+            });
+            
+            closeBtn.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('❌ Close TOUCHED');
+                hideDetails();
+            });
+            
+            closeBtn.addEventListener('mousedown', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('❌ Close MOUSE DOWN');
+                hideDetails();
+            });
+            
+            // Force clickable properties
+            closeBtn.style.cursor = 'pointer';
+            closeBtn.style.userSelect = 'none';
+            closeBtn.style.webkitUserSelect = 'none';
+            closeBtn.style.touchAction = 'manipulation';
+            closeBtn.style.pointerEvents = 'auto';
+            
+            console.log('✅ Close button setup complete');
+        }
+    }, 500);
+    
+    // Backup interaction setup - try again after more time
+    setTimeout(() => {
+        console.log('🔧 Backup AR interactions setup');
+        ensureInteractionsWork();
+    }, 2000);
+}
+
+function ensureInteractionsWork() {
+    // Backup method to ensure interactions work
     const moreInfoBtn = document.querySelector('#more-info-btn');
-    if (moreInfoBtn && !moreInfoBtn.hasAttribute('data-setup')) {
-        moreInfoBtn.setAttribute('data-setup', 'true');
-        
-        moreInfoBtn.addEventListener('click', () => {
-            console.log('🔍 More info clicked');
+    if (moreInfoBtn) {
+        // Force click handler one more time
+        moreInfoBtn.onclick = function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('🔍 More info BACKUP ONCLICK');
             toggleDetails();
-        });
+            return false;
+        };
         
-        console.log('✅ More info button setup');
+        console.log('✅ Backup click handler attached to more info button');
     }
     
-    // Close button
     const closeBtn = document.querySelector('#close-btn');
-    if (closeBtn && !closeBtn.hasAttribute('data-setup')) {
-        closeBtn.setAttribute('data-setup', 'true');
-        
-        closeBtn.addEventListener('click', () => {
-            console.log('❌ Close clicked');
+    if (closeBtn) {
+        closeBtn.onclick = function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('❌ Close BACKUP ONCLICK');
             hideDetails();
-        });
+            return false;
+        };
         
-        console.log('✅ Close button setup');
+        console.log('✅ Backup click handler attached to close button');
     }
 }
 
 let detailsVisible = false;
 
 function toggleDetails() {
+    console.log('🔄 Toggle details called, current state:', detailsVisible);
+    
     if (detailsVisible) {
         hideDetails();
     } else {
@@ -357,28 +482,49 @@ function toggleDetails() {
 }
 
 function showDetails() {
+    console.log('📖 Showing details...');
+    
     const detailsPanel = document.querySelector('#details-panel');
     if (detailsPanel) {
         detailsPanel.setAttribute('visible', 'true');
         
-        // Force details panel visibility
+        // Force details panel visibility with multiple methods
         detailsPanel.style.opacity = '1';
         detailsPanel.style.visibility = 'visible';
+        detailsPanel.style.display = 'block';
         detailsPanel.style.zIndex = '200';
         detailsPanel.style.position = 'relative';
         
+        // Add animation
+        detailsPanel.setAttribute('animation', 'property: scale; from: 0.1 0.1 0.1; to: 1 1 1; dur: 300; easing: easeOutBack');
+        
         detailsVisible = true;
-        console.log('📖 Details shown');
-        showNotification('📖 Información ampliada');
+        console.log('✅ Details panel shown and visible state set to true');
+        showNotification('📖 Información completa mostrada');
+    } else {
+        console.log('❌ Details panel not found');
     }
 }
 
 function hideDetails() {
+    console.log('📖 Hiding details...');
+    
     const detailsPanel = document.querySelector('#details-panel');
     if (detailsPanel && detailsVisible) {
-        detailsPanel.setAttribute('visible', 'false');
+        // Add closing animation
+        detailsPanel.setAttribute('animation', 'property: scale; from: 1 1 1; to: 0.1 0.1 0.1; dur: 200; easing: easeInQuad');
+        
+        // Hide after animation
+        setTimeout(() => {
+            detailsPanel.setAttribute('visible', 'false');
+            detailsPanel.style.opacity = '0';
+            detailsPanel.style.visibility = 'hidden';
+        }, 200);
+        
         detailsVisible = false;
-        console.log('📖 Details hidden');
+        console.log('✅ Details panel hidden and visible state set to false');
+    } else {
+        console.log('❌ Details panel not found or not visible');
     }
 }
 
@@ -407,6 +553,7 @@ function showNotification(message) {
         transition: opacity 0.3s ease;
         max-width: 90%;
         text-align: center;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.3);
     `;
     
     document.body.appendChild(notification);
@@ -530,20 +677,30 @@ setTimeout(() => {
     }
 }, 5000);
 
-// Debug: Check AR content visibility every 10 seconds when AR is active
+// Debug: Check AR content visibility and interactions every 15 seconds when AR is active
 setInterval(() => {
     if (isARStarted) {
         const arContent = document.querySelector('#ar-content');
         const titleText = document.querySelector('#title-text');
+        const moreInfoBtn = document.querySelector('#more-info-btn');
         const marker = document.querySelector('#jordan-1-marker');
         
         console.log('🔍 AR Debug Check:', {
             arContentExists: !!arContent,
             titleTextExists: !!titleText,
+            moreInfoBtnExists: !!moreInfoBtn,
+            moreInfoBtnSetup: moreInfoBtn ? moreInfoBtn.hasAttribute('data-setup') : false,
             markerExists: !!marker,
-            markerVisible: marker ? marker.object3D.visible : false
+            markerVisible: marker ? marker.object3D.visible : false,
+            detailsVisible: detailsVisible
         });
+        
+        // Ensure more info button is always clickable
+        if (moreInfoBtn) {
+            moreInfoBtn.style.pointerEvents = 'auto';
+            moreInfoBtn.style.cursor = 'pointer';
+        }
     }
-}, 10000);
+}, 15000);
 
-console.log('🔥 Working AR script with Z-Index fix loaded');
+console.log('🔥 Final AR script with enhanced interactions loaded');
