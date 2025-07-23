@@ -1,726 +1,321 @@
-// The Hype Way AR - Main JavaScript (FINAL VERSION)
+// The Hype Way AR - MINIMAL VERSION THAT WORKS
 
-class TheHypeWayAR {
-    constructor() {
-        this.scene = null;
-        this.camera = null;
-        this.marker = null;
-        this.isARActive = false;
-        this.detailsVisible = false;
-        this.isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-        this.isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+console.log('🔥 Loading Minimal AR Script');
+
+// Global variables
+let isARStarted = false;
+
+// Wait for page to load
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('📱 DOM loaded');
+    
+    // Force show instructions after loading
+    setTimeout(showInstructions, 2000);
+    
+    // Setup button click - SINGLE EVENT LISTENER
+    setupStartButton();
+    
+    // Setup AR scene
+    setupAR();
+});
+
+function showInstructions() {
+    const loading = document.getElementById('loading-screen');
+    const instructions = document.getElementById('instructions');
+    
+    console.log('🔧 Showing instructions');
+    
+    if (loading) {
+        loading.style.display = 'none';
+    }
+    
+    if (instructions) {
+        instructions.style.display = 'flex';
+        instructions.style.opacity = '1';
+    }
+}
+
+function setupStartButton() {
+    // Wait a bit for DOM to be ready
+    setTimeout(() => {
+        const button = document.getElementById('start-ar');
         
-        this.init();
-    }
-    
-    init() {
-        console.log('🔥 Initializing The Hype Way AR...');
-        console.log('📱 Device info:', {
-            iOS: this.isIOS,
-            Safari: this.isSafari,
-            userAgent: navigator.userAgent
-        });
-        
-        // Wait for DOM to load
-        document.addEventListener('DOMContentLoaded', () => {
-            this.setupEventListeners();
-            this.setupAR();
-            this.handleIOSSpecifics();
-            this.forceShowInstructions();
-        });
-    }
-    
-    handleIOSSpecifics() {
-        if (this.isIOS) {
-            console.log('📱 iOS device detected - applying iOS fixes');
+        if (button) {
+            console.log('✅ Button found, setting up click handler');
             
-            // Show iOS warning if not Safari
-            if (!this.isSafari) {
-                setTimeout(() => {
-                    this.showNotification('⚠️ Para mejor compatibilidad, usa Safari en iOS');
-                }, 2000);
-            }
+            // Remove any existing listeners
+            button.onclick = null;
             
-            // Handle iOS camera permissions more gracefully
-            this.checkIOSCameraPermissions();
-            
-            // Fix iOS viewport height
-            this.fixIOSViewport();
-        }
-    }
-    
-    checkIOSCameraPermissions() {
-        // Pre-check camera availability on iOS
-        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-            navigator.mediaDevices.getUserMedia({ 
-                video: { 
-                    facingMode: 'environment',
-                    width: { ideal: 640, max: 1280 },
-                    height: { ideal: 480, max: 720 }
-                } 
-            }).then(stream => {
-                console.log('📹 iOS camera access granted');
-                // Stop the stream immediately as AR.js will handle it
-                stream.getTracks().forEach(track => track.stop());
-            }).catch(err => {
-                console.error('❌ iOS camera permission issue:', err);
-                // Don't show error immediately, wait for user interaction
-            });
-        }
-    }
-    
-    fixIOSViewport() {
-        // Fix iOS viewport height issues
-        const setViewportHeight = () => {
-            const vh = window.innerHeight * 0.01;
-            document.documentElement.style.setProperty('--vh', `${vh}px`);
-        };
-        
-        setViewportHeight();
-        window.addEventListener('resize', setViewportHeight);
-        window.addEventListener('orientationchange', () => {
-            setTimeout(setViewportHeight, 100);
-        });
-    }
-    
-    forceShowInstructions() {
-        // Force show instructions after 2 seconds to prevent infinite loading
-        setTimeout(() => {
-            const loadingScreen = document.getElementById('loading-screen');
-            const instructions = document.getElementById('instructions');
-            
-            console.log('🔧 Force check - Loading screen:', loadingScreen ? 'found' : 'not found');
-            console.log('🔧 Force check - Instructions:', instructions ? 'found' : 'not found');
-            
-            if (loadingScreen && window.getComputedStyle(loadingScreen).display !== 'none') {
-                console.log('🔧 Force hiding loading screen');
-                loadingScreen.style.opacity = '0';
-                setTimeout(() => {
-                    loadingScreen.style.display = 'none';
-                }, 500);
-            }
-            
-            if (instructions && window.getComputedStyle(instructions).display === 'none') {
-                console.log('🔧 Force showing instructions');
-                instructions.style.display = 'flex';
-                instructions.style.opacity = '1';
-            }
-        }, 2000);
-        
-        // Also try immediately when DOM loads
-        setTimeout(() => {
-            const loadingScreen = document.getElementById('loading-screen');
-            const instructions = document.getElementById('instructions');
-            
-            if (loadingScreen) {
-                loadingScreen.style.opacity = '0.5';
-            }
-            if (instructions) {
-                instructions.style.opacity = '1';
-            }
-        }, 500);
-    }
-    
-    setupEventListeners() {
-        // Start AR button
-        const startBtn = document.getElementById('start-ar');
-        if (startBtn) {
-            startBtn.addEventListener('click', () => {
-                console.log('🎯 Start AR button clicked');
-                this.startARExperience();
-            });
-            
-            // iOS specific touch handling
-            if (this.isIOS) {
-                startBtn.addEventListener('touchstart', (e) => {
-                    e.preventDefault();
-                    startBtn.style.transform = 'scale(0.95)';
-                });
+            // Add single click handler
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
                 
-                startBtn.addEventListener('touchend', (e) => {
-                    e.preventDefault();  
-                    startBtn.style.transform = 'scale(1)';
-                });
-            }
+                console.log('🎯 BUTTON CLICKED - Starting AR');
+                startAR();
+                
+                return false;
+            }, { once: false });
+            
         } else {
-            console.log('❌ Start button not found');
+            console.log('❌ Button not found, retrying...');
+            setTimeout(setupStartButton, 1000);
         }
-        
-        // Share button
-        const shareBtn = document.getElementById('share-btn');
-        if (shareBtn) {
-            shareBtn.addEventListener('click', () => {
-                this.shareExperience();
-            });
-        }
-        
-        // AR interactions (set up after A-Frame loads)
-        setTimeout(() => {
-            this.setupARInteractions();
-        }, 3000);
+    }, 500);
+}
+
+function startAR() {
+    if (isARStarted) {
+        console.log('⚠️ AR already started');
+        return;
     }
     
-    setupAR() {
-        // Wait for A-Frame to initialize
+    console.log('🚀 Starting AR...');
+    isARStarted = true;
+    
+    // Step 1: Hide all overlays IMMEDIATELY
+    hideAllOverlays();
+    
+    // Step 2: Add AR class to body
+    document.body.classList.add('ar-active');
+    document.body.classList.remove('loading');
+    
+    // Step 3: Force scene visibility
+    forceSceneVisible();
+    
+    // Step 4: Request camera
+    requestCamera();
+    
+    // Step 5: Show notification
+    setTimeout(() => {
+        showNotification('📹 AR activado! Busca el marker Hiro');
+    }, 1000);
+}
+
+function hideAllOverlays() {
+    console.log('🔧 Hiding all overlays');
+    
+    const selectors = [
+        '#loading-screen',
+        '#instructions', 
+        '.overlay',
+        '.instruction-content'
+    ];
+    
+    selectors.forEach(selector => {
+        const elements = document.querySelectorAll(selector);
+        elements.forEach(el => {
+            el.style.display = 'none';
+            el.style.visibility = 'hidden';
+            el.style.opacity = '0';
+            el.style.zIndex = '-9999';
+            el.style.pointerEvents = 'none';
+        });
+    });
+    
+    // Remove from DOM completely
+    setTimeout(() => {
+        selectors.forEach(selector => {
+            const elements = document.querySelectorAll(selector);
+            elements.forEach(el => {
+                if (el.parentNode) {
+                    el.parentNode.removeChild(el);
+                }
+            });
+        });
+    }, 100);
+}
+
+function forceSceneVisible() {
+    console.log('🔧 Forcing scene visible');
+    
+    const scene = document.querySelector('a-scene');
+    if (scene) {
+        scene.style.display = 'block';
+        scene.style.visibility = 'visible';
+        scene.style.opacity = '1';
+        scene.style.position = 'fixed';
+        scene.style.top = '0';
+        scene.style.left = '0';
+        scene.style.width = '100vw';
+        scene.style.height = '100vh';
+        scene.style.zIndex = '1';
+    }
+    
+    // Force canvas full screen
+    setTimeout(() => {
+        const canvas = document.querySelector('a-scene canvas');
+        if (canvas) {
+            canvas.style.width = '100vw';
+            canvas.style.height = '100vh';
+            canvas.style.position = 'fixed';
+            canvas.style.top = '0';
+            canvas.style.left = '0';
+        }
+    }, 500);
+    
+    // Force video full screen
+    setTimeout(() => {
+        const video = document.querySelector('video');
+        if (video) {
+            console.log('🔧 Forcing video full screen');
+            video.style.width = '100vw';
+            video.style.height = '100vh';
+            video.style.objectFit = 'cover';
+            video.style.position = 'fixed';
+            video.style.top = '0';
+            video.style.left = '0';
+            video.style.zIndex = '1';
+        }
+    }, 1000);
+}
+
+function requestCamera() {
+    console.log('📹 Requesting camera');
+    
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        navigator.mediaDevices.getUserMedia({ 
+            video: { 
+                facingMode: 'environment',
+                width: { ideal: 640 },
+                height: { ideal: 480 }
+            } 
+        }).then(stream => {
+            console.log('✅ Camera granted');
+            // Stop stream - A-Frame will handle it
+            stream.getTracks().forEach(track => track.stop());
+        }).catch(err => {
+            console.error('❌ Camera denied:', err);
+            showNotification('⚠️ Permite acceso a la cámara');
+        });
+    }
+}
+
+function setupAR() {
+    // Wait for A-Frame to load
+    const checkAFrame = () => {
         const scene = document.querySelector('a-scene');
         if (scene) {
             scene.addEventListener('loaded', () => {
-                console.log('✅ A-Frame scene loaded');
-                this.scene = scene;
-                this.marker = document.querySelector('#jordan-1-marker');
-                
-                if (this.marker) {
-                    // Marker events
-                    this.marker.addEventListener('markerFound', () => {
-                        console.log('🎯 Marker detectado!');
-                        this.onMarkerFound();
-                    });
-                    
-                    this.marker.addEventListener('markerLost', () => {
-                        console.log('😞 Marker perdido');
-                        this.onMarkerLost();
-                    });
-                    
-                    console.log('✅ Marker event listeners attached');
-                } else {
-                    console.log('❌ Marker element not found');
-                }
-                
-                console.log('✅ AR Scene initialized');
+                console.log('✅ A-Frame loaded');
+                setupMarkerEvents();
             });
+        } else {
+            setTimeout(checkAFrame, 500);
+        }
+    };
+    
+    setTimeout(checkAFrame, 1000);
+}
+
+function setupMarkerEvents() {
+    const marker = document.querySelector('#jordan-1-marker');
+    if (marker) {
+        marker.addEventListener('markerFound', () => {
+            console.log('🎯 Marker found!');
+            showNotification('✨ ¡Marker detectado! Contenido AR visible');
             
-            // Handle A-Frame loading errors
-            scene.addEventListener('error', (error) => {
-                console.error('❌ A-Frame error:', error);
-                this.showNotification('❌ Error cargando AR. Recarga la página.');
-            });
-        } else {
-            console.log('❌ A-Frame scene not found');
-        }
-    }
-    
-    setupARInteractions() {
-        // More info button
-        const moreInfoBtn = document.querySelector('#more-info-btn');
-        if (moreInfoBtn) {
-            moreInfoBtn.addEventListener('click', () => {
-                console.log('🔍 More info button clicked');
-                this.toggleDetails();
-            });
-            
-            // iOS touch feedback
-            if (this.isIOS) {
-                moreInfoBtn.addEventListener('touchstart', () => {
-                    moreInfoBtn.setAttribute('scale', '0.95 0.95 0.95');
-                });
-                
-                moreInfoBtn.addEventListener('touchend', () => {
-                    moreInfoBtn.setAttribute('scale', '1 1 1');
-                });
-            }
-        }
-        
-        // Close button
-        const closeBtn = document.querySelector('#close-btn');
-        if (closeBtn) {
-            closeBtn.addEventListener('click', () => {
-                console.log('❌ Close button clicked');
-                this.hideDetails();
-            });
-        }
-    }
-    
-    startARExperience() {
-        console.log('🚀 Starting AR Experience...');
-        
-        // CRITICAL: Add class to trigger CSS hiding
-        document.body.classList.add('ar-started');
-        document.body.classList.remove('ar-loading');
-        
-        console.log('🔧 Added ar-started class to body');
-        
-        // Force remove overlays immediately
-        this.forceRemoveAllOverlays();
-        
-        // iOS specific camera handling
-        if (this.isIOS) {
-            this.handleIOSCamera();
-        } else {
-            // Standard camera request
-            this.requestCameraPermission();
-        }
-        
-        // Show success message after a moment
-        setTimeout(() => {
-            this.showNotification('📹 AR activado! Busca el marker Hiro impreso');
-        }, 1000);
-        
-        console.log('🚀 AR Experience started');
-    }
-    
-    forceRemoveAllOverlays() {
-        console.log('🔧 Force removing all overlays...');
-        
-        // List of all possible overlay selectors
-        const overlaySelectors = [
-            '#loading-screen',
-            '#instructions', 
-            '.overlay',
-            '.instruction-content',
-            '[class*="overlay"]',
-            '[id*="loading"]',
-            '[id*="instruction"]'
-        ];
-        
-        overlaySelectors.forEach(selector => {
-            const elements = document.querySelectorAll(selector);
-            elements.forEach(element => {
-                if (element) {
-                    // Multiple ways to hide/remove
-                    element.style.display = 'none !important';
-                    element.style.visibility = 'hidden !important';
-                    element.style.opacity = '0 !important';
-                    element.style.zIndex = '-9999 !important';
-                    element.style.position = 'absolute !important';
-                    element.style.left = '-9999px !important';
-                    element.style.top = '-9999px !important';
-                    element.style.pointerEvents = 'none !important';
-                    element.style.transform = 'translateX(-9999px) !important';
-                    
-                    // Remove from DOM after a brief delay
-                    setTimeout(() => {
-                        if (element.parentNode) {
-                            element.parentNode.removeChild(element);
-                        }
-                    }, 200);
-                    
-                    console.log('🔧 Removed overlay element:', selector);
-                }
-            });
-        });
-        
-        // Force show A-Frame scene
-        const scene = document.querySelector('a-scene');
-        if (scene) {
-            scene.style.display = 'block !important';
-            scene.style.visibility = 'visible !important';
-            scene.style.opacity = '1 !important';
-            scene.style.zIndex = '1 !important';
-            scene.style.position = 'fixed !important';
-            scene.style.top = '0 !important';
-            scene.style.left = '0 !important';
-            scene.style.width = '100vw !important';
-            scene.style.height = '100vh !important';
-            console.log('🔧 Forced A-Frame scene to be visible');
-        }
-        
-        // Force show A-Frame canvas
-        const canvas = document.querySelector('a-scene canvas');
-        if (canvas) {
-            canvas.style.width = '100vw !important';
-            canvas.style.height = '100vh !important';
-            canvas.style.position = 'fixed !important';
-            canvas.style.top = '0 !important';
-            canvas.style.left = '0 !important';
-            console.log('🔧 Forced A-Frame canvas to full screen');
-        }
-        
-        // Force show video element (camera feed)
-        setTimeout(() => {
-            const video = document.querySelector('video');
-            if (video) {
-                video.style.width = '100vw !important';
-                video.style.height = '100vh !important';
-                video.style.objectFit = 'cover !important';
-                video.style.position = 'fixed !important';
-                video.style.top = '0 !important';
-                video.style.left = '0 !important';
-                console.log('🔧 Forced video to full screen');
-            }
-        }, 500);
-    }
-    
-    handleIOSCamera() {
-        console.log('📱 Handling iOS camera permissions');
-        
-        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-            navigator.mediaDevices.getUserMedia({ 
-                video: { 
-                    facingMode: 'environment',
-                    width: { ideal: 640, max: 1280 },
-                    height: { ideal: 480, max: 720 }
-                } 
-            }).then(stream => {
-                console.log('📹 iOS Camera access granted');
-                // Stop the stream immediately as A-Frame will handle it
-                stream.getTracks().forEach(track => track.stop());
-                
-                // Additional notification for iOS
-                setTimeout(() => {
-                    this.showNotification('🎯 Apunta al marker Hiro para ver el contenido AR');
-                }, 2000);
-            }).catch(err => {
-                console.error('❌ iOS Camera access denied:', err);
-                this.showNotification('⚠️ Permite acceso a la cámara en Configuración > Safari');
-                
-                // Show iOS specific instructions
-                setTimeout(() => {
-                    const message = 'Para activar la cámara:\n1. Ve a Configuración iOS\n2. Safari > Cámara\n3. Permitir acceso\n4. Recarga esta página';
-                    alert(message);
-                }, 2000);
-            });
-        } else {
-            console.log('❌ getUserMedia not available');
-            this.showNotification('❌ Cámara no disponible en este navegador. Usa Safari.');
-        }
-    }
-    
-    requestCameraPermission() {
-        // Standard camera permission request
-        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-            navigator.mediaDevices.getUserMedia({ 
-                video: { 
-                    facingMode: 'environment',
-                    width: { ideal: 640 },
-                    height: { ideal: 480 }
-                } 
-            }).then(stream => {
-                console.log('📹 Camera access granted');
-                // Stop the stream immediately as A-Frame will handle it
-                stream.getTracks().forEach(track => track.stop());
-                
-                setTimeout(() => {
-                    this.showNotification('🎯 Apunta al marker Hiro para ver el contenido AR');
-                }, 1500);
-            }).catch(err => {
-                console.error('❌ Camera access denied:', err);
-                this.showNotification('⚠️ Necesitas permitir acceso a la cámara');
-            });
-        }
-    }
-    
-    onMarkerFound() {
-        this.isARActive = true;
-        
-        // Show share button
-        const shareBtn = document.getElementById('share-btn');
-        if (shareBtn) {
-            shareBtn.classList.remove('hidden');
-        }
-        
-        // Show success notification
-        this.showNotification('🎯 ¡Marker encontrado! Mira el contenido AR');
-        
-        // iOS haptic feedback if available
-        if (this.isIOS && navigator.vibrate) {
-            navigator.vibrate(100);
-        }
-        
-        console.log('✨ AR Content activated');
-    }
-    
-    onMarkerLost() {
-        this.isARActive = false;
-        this.hideDetails();
-        
-        // Hide share button
-        const shareBtn = document.getElementById('share-btn');
-        if (shareBtn) {
-            shareBtn.classList.add('hidden');
-        }
-        
-        console.log('😞 AR Content deactivated');
-    }
-    
-    toggleDetails() {
-        if (this.detailsVisible) {
-            this.hideDetails();
-        } else {
-            this.showDetails();
-        }
-    }
-    
-    showDetails() {
-        const detailsPanel = document.querySelector('#details-panel');
-        if (detailsPanel) {
-            detailsPanel.setAttribute('visible', 'true');
-            detailsPanel.setAttribute('animation', 'property: scale; from: 0.1 0.1 0.1; to: 1 1 1; dur: 300; easing: easeOutBack');
-            this.detailsVisible = true;
-            
-            // iOS haptic feedback
-            if (this.isIOS && navigator.vibrate) {
-                navigator.vibrate(50);
-            }
-            
-            console.log('📖 Details opened');
-        }
-    }
-    
-    hideDetails() {
-        const detailsPanel = document.querySelector('#details-panel');
-        if (detailsPanel && this.detailsVisible) {
-            detailsPanel.setAttribute('animation', 'property: scale; from: 1 1 1; to: 0.1 0.1 0.1; dur: 200; easing: easeInQuad');
-            setTimeout(() => {
-                detailsPanel.setAttribute('visible', 'false');
-            }, 200);
-            this.detailsVisible = false;
-        }
-    }
-    
-    shareExperience() {
-        const shareData = {
-            title: 'The Hype Way AR - Air Jordan 1 Chicago',
-            text: '🔥 Acabo de descubrir la historia del Air Jordan 1 Chicago en AR! La cultura sneaker cobra vida con The Hype Way.',
-            url: window.location.href
-        };
-        
-        console.log('📱 Attempting to share...');
-        
-        // iOS native sharing
-        if (this.isIOS && navigator.share) {
-            navigator.share(shareData)
-                .then(() => {
-                    console.log('✅ iOS native share successful');
-                    this.showNotification('✅ ¡Compartido exitosamente!');
-                })
-                .catch(err => {
-                    console.log('❌ iOS native share failed:', err);
-                    this.fallbackShare(shareData);
-                });
-        } else if (navigator.share) {
-            // Standard Web Share API
-            navigator.share(shareData)
-                .then(() => {
-                    console.log('✅ Web Share API successful');
-                    this.showNotification('✅ ¡Compartido exitosamente!');
-                })
-                .catch(err => {
-                    console.log('❌ Web Share API failed:', err);
-                    this.fallbackShare(shareData);
-                });
-        } else {
-            this.fallbackShare(shareData);
-        }
-    }
-    
-    fallbackShare(shareData) {
-        // Fallback: copy to clipboard
-        const textToCopy = `${shareData.text} ${shareData.url}`;
-        
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-            navigator.clipboard.writeText(textToCopy).then(() => {
-                this.showNotification('📋 ¡Enlace copiado al portapapeles!');
-            }).catch(() => {
-                this.legacyFallbackShare(shareData);
-            });
-        } else {
-            this.legacyFallbackShare(shareData);
-        }
-    }
-    
-    legacyFallbackShare(shareData) {
-        // Ultimate fallback for older browsers/iOS versions
-        const textArea = document.createElement('textarea');
-        textArea.value = `${shareData.text} ${shareData.url}`;
-        textArea.style.position = 'fixed';
-        textArea.style.left = '-999999px';
-        textArea.style.top = '-999999px';
-        document.body.appendChild(textArea);
-        textArea.focus();
-        textArea.select();
-        
-        try {
-            const successful = document.execCommand('copy');
-            if (successful) {
-                this.showNotification('📋 ¡Enlace copiado al portapapeles!');
-            } else {
-                this.showNotification('💡 Comparte manualmente: ' + shareData.url);
-            }
-        } catch (err) {
-            console.log('Legacy copy failed:', err);
-            this.showNotification('💡 Comparte: ' + shareData.url);
-        }
-        
-        document.body.removeChild(textArea);
-    }
-    
-    showNotification(message) {
-        // Remove any existing notifications first
-        const existingNotifications = document.querySelectorAll('.ar-notification');
-        existingNotifications.forEach(notif => {
-            if (document.body.contains(notif)) {
-                document.body.removeChild(notif);
+            // Show share button
+            const shareBtn = document.getElementById('share-btn');
+            if (shareBtn) {
+                shareBtn.classList.remove('hidden');
             }
         });
         
-        // Create temporary notification
-        const notification = document.createElement('div');
-        notification.className = 'ar-notification';
-        notification.style.cssText = `
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #DC143C;
-            color: white;
-            padding: 12px 24px;
-            border-radius: 25px;
-            z-index: 10001;
-            font-size: 14px;
-            font-weight: bold;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-            max-width: 90%;
-            text-align: center;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        `;
-        notification.textContent = message;
-        document.body.appendChild(notification);
-        
-        // Animate in
-        setTimeout(() => {
-            notification.style.opacity = '1';
-        }, 100);
-        
-        // Remove after 4 seconds
-        setTimeout(() => {
-            notification.style.opacity = '0';
-            setTimeout(() => {
-                if (document.body.contains(notification)) {
-                    document.body.removeChild(notification);
-                }
-            }, 300);
-        }, 4000);
-    }
-}
-
-// Initialize the AR experience
-console.log('🔥 Starting The Hype Way AR initialization...');
-const theHypeWayAR = new TheHypeWayAR();
-
-// EMERGENCY OVERRIDE FOR STUBBORN OVERLAYS
-function forceRemoveOverlays() {
-    const elements = document.querySelectorAll('#loading-screen, #instructions, .overlay');
-    elements.forEach(el => {
-        if (el) {
-            el.remove(); // Remove completely from DOM
-        }
-    });
-    
-    // Force body class
-    document.body.classList.add('ar-started');
-    document.body.classList.remove('ar-loading');
-    
-    // Force scene visibility
-    const scene = document.querySelector('a-scene');
-    if (scene) {
-        scene.style.display = 'block !important';
-        scene.style.visibility = 'visible !important';
-        scene.style.opacity = '1 !important';
-        scene.style.position = 'fixed !important';
-        scene.style.top = '0 !important';
-        scene.style.left = '0 !important';
-        scene.style.width = '100vw !important';
-        scene.style.height = '100vh !important';
-        scene.style.zIndex = '1 !important';
-    }
-    
-    console.log('🔧 EMERGENCY: Force removed all overlays');
-}
-
-// Backup initialization for iOS and edge cases
-document.addEventListener('DOMContentLoaded', () => {
-    console.log('📱 DOM Content Loaded');
-    
-    // Emergency button click handler with multiple attempts
-    document.addEventListener('click', (e) => {
-        if (e.target.id === 'start-ar') {
-            console.log('🔧 Emergency click handler triggered');
-            setTimeout(forceRemoveOverlays, 50);
-            setTimeout(forceRemoveOverlays, 200);
-            setTimeout(forceRemoveOverlays, 500);
-            setTimeout(forceRemoveOverlays, 1000);
-        }
-    });
-    
-    // iOS specific backup
-    if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
-        console.log('📱 iOS backup initialization');
-        
-        // Force show instructions after 3 seconds on iOS
-        setTimeout(() => {
-            const loadingScreen = document.getElementById('loading-screen');
-            const instructions = document.getElementById('instructions');
+        marker.addEventListener('markerLost', () => {
+            console.log('😞 Marker lost');
             
-            if (loadingScreen && instructions) {
-                console.log('🔧 iOS Backup: Force showing instructions');
-                loadingScreen.style.display = 'none';
-                instructions.style.display = 'flex';
+            // Hide share button
+            const shareBtn = document.getElementById('share-btn');
+            if (shareBtn) {
+                shareBtn.classList.add('hidden');
             }
-        }, 3000);
+        });
         
-        // iOS backup start button with super aggressive overlay removal
-        setTimeout(() => {
-            const startBtn = document.getElementById('start-ar');
-            if (startBtn) {
-                startBtn.addEventListener('click', () => {
-                    console.log('🔧 iOS backup start button clicked');
-                    
-                    // SUPER AGGRESSIVE REMOVAL
-                    setTimeout(() => {
-                        document.body.classList.add('ar-started');
-                        forceRemoveOverlays();
-                        
-                        // Force full screen video
-                        setTimeout(() => {
-                            const video = document.querySelector('video');
-                            if (video) {
-                                video.style.width = '100vw !important';
-                                video.style.height = '100vh !important';
-                                video.style.objectFit = 'cover !important';
-                                video.style.position = 'fixed !important';
-                                video.style.top = '0 !important';
-                                video.style.left = '0 !important';
-                                video.style.zIndex = '1 !important';
-                            }
-                        }, 1000);
-                    }, 100);
-                    
-                    // Show camera request for iOS
-                    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-                        navigator.mediaDevices.getUserMedia({ 
-                            video: { facingMode: 'environment' }
-                        }).then(stream => {
-                            console.log('📹 iOS backup camera granted');
-                            stream.getTracks().forEach(track => track.stop());
-                        }).catch(err => {
-                            console.error('❌ iOS backup camera denied:', err);
-                            alert('Para usar AR, permite acceso a la cámara en Configuración > Safari > Cámara');
-                        });
-                    }
-                });
-            }
-        }, 4000);
+        console.log('✅ Marker events setup');
     }
+}
+
+function showNotification(message) {
+    // Remove existing notifications
+    const existing = document.querySelectorAll('.ar-notification');
+    existing.forEach(n => n.remove());
     
-    // Standard backup for all devices
+    // Create notification
+    const notification = document.createElement('div');
+    notification.className = 'ar-notification';
+    notification.textContent = message;
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #DC143C;
+        color: white;
+        padding: 12px 24px;
+        border-radius: 25px;
+        z-index: 10001;
+        font-size: 14px;
+        font-weight: bold;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        max-width: 90%;
+        text-align: center;
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // Show
     setTimeout(() => {
-        const clickableElements = document.querySelectorAll('.clickable');
-        clickableElements.forEach(el => {
-            el.addEventListener('click', function() {
-                console.log('🖱️ Clicked:', this.id);
-            });
-        });
-    }, 5000);
-});
+        notification.style.opacity = '1';
+    }, 100);
+    
+    // Hide after 4 seconds
+    setTimeout(() => {
+        notification.style.opacity = '0';
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.parentNode.removeChild(notification);
+            }
+        }, 300);
+    }, 4000);
+}
 
-// Debug info
-console.log('🔍 Debug Info:', {
-    userAgent: navigator.userAgent,
-    url: window.location.href,
-    screen: `${window.screen.width}x${window.screen.height}`,
-    viewport: `${window.innerWidth}x${window.innerHeight}`,  
-    devicePixelRatio: window.devicePixelRatio,
-    iOS: /iPad|iPhone|iPod/.test(navigator.userAgent),
-    Safari: /^((?!chrome|android).)*safari/i.test(navigator.userAgent)
-});
+// iOS specific fixes
+if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
+    console.log('📱 iOS device detected');
+    
+    // Viewport height fix
+    const setVH = () => {
+        document.documentElement.style.setProperty('--vh', `${window.innerHeight * 0.01}px`);
+    };
+    setVH();
+    window.addEventListener('resize', setVH);
+    window.addEventListener('orientationchange', setVH);
+    
+    // Prevent zoom
+    document.addEventListener('touchstart', function(e) {
+        if (e.touches.length > 1) {
+            e.preventDefault();
+        }
+    }, { passive: false });
+}
+
+// Emergency backup - if nothing works, this will
+setTimeout(() => {
+    if (!isARStarted) {
+        console.log('🚨 Emergency backup: Force showing instructions');
+        showInstructions();
+        
+        // Emergency button setup
+        const btn = document.getElementById('start-ar');
+        if (btn && !btn.onclick) {
+            btn.onclick = () => {
+                console.log('🚨 Emergency button click');
+                startAR();
+            };
+        }
+    }
+}, 5000);
+
+console.log('🔥 Minimal AR script loaded');
