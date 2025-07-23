@@ -234,7 +234,7 @@ class TheHypeWayAR {
         console.log('🚀 Starting AR Experience...');
         
         // Add AR active class to body for CSS targeting
-        document.body.classList.add('ar-active');
+        document.body.classList.add('ar-started');
         
         // Hide instructions and loading IMMEDIATELY and COMPLETELY
         const instructions = document.getElementById('instructions');
