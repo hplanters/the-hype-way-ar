@@ -1,4 +1,4 @@
-// The Hype Way AR - Main JavaScript (iOS Optimized + UI Fix)
+// The Hype Way AR - Main JavaScript (FINAL VERSION)
 
 class TheHypeWayAR {
     constructor() {
@@ -233,69 +233,14 @@ class TheHypeWayAR {
     startARExperience() {
         console.log('🚀 Starting AR Experience...');
         
-        // Add AR active class to body for CSS targeting
+        // CRITICAL: Add class to trigger CSS hiding
         document.body.classList.add('ar-started');
+        document.body.classList.remove('ar-loading');
         
-        // Hide instructions and loading IMMEDIATELY and COMPLETELY
-        const instructions = document.getElementById('instructions');
-        const loadingScreen = document.getElementById('loading-screen');
+        console.log('🔧 Added ar-started class to body');
         
-        // Force hide instructions completely
-        if (instructions) {
-            console.log('🔧 Removing instructions overlay completely');
-            instructions.style.display = 'none !important';
-            instructions.style.visibility = 'hidden';
-            instructions.style.opacity = '0';
-            instructions.style.zIndex = '-1000';
-            instructions.style.pointerEvents = 'none';
-            // Remove completely from DOM after animation
-            setTimeout(() => {
-                if (instructions.parentNode) {
-                    instructions.parentNode.removeChild(instructions);
-                }
-            }, 100);
-        }
-        
-        // Force hide loading screen completely
-        if (loadingScreen) {
-            console.log('🔧 Removing loading screen completely');
-            loadingScreen.style.display = 'none !important';
-            loadingScreen.style.visibility = 'hidden';
-            loadingScreen.style.opacity = '0';
-            loadingScreen.style.zIndex = '-1000';
-            loadingScreen.style.pointerEvents = 'none';
-            // Remove completely from DOM after animation
-            setTimeout(() => {
-                if (loadingScreen.parentNode) {
-                    loadingScreen.parentNode.removeChild(loadingScreen);
-                }
-            }, 100);
-        }
-        
-        // Force show A-Frame scene
-        const scene = document.querySelector('a-scene');
-        if (scene) {
-            console.log('🔧 Forcing A-Frame scene to be visible');
-            scene.style.display = 'block !important';
-            scene.style.visibility = 'visible !important';
-            scene.style.opacity = '1 !important';
-            scene.style.zIndex = '1 !important';
-            scene.style.position = 'fixed !important';
-            scene.style.top = '0 !important';
-            scene.style.left = '0 !important';
-            scene.style.width = '100vw !important';
-            scene.style.height = '100vh !important';
-        }
-        
-        // Clear any remaining overlays
-        const overlays = document.querySelectorAll('.overlay');
-        overlays.forEach(overlay => {
-            if (overlay !== instructions) { // Already handled instructions
-                overlay.style.display = 'none !important';
-                overlay.style.visibility = 'hidden';
-                overlay.style.zIndex = '-1000';
-            }
-        });
+        // Force remove overlays immediately
+        this.forceRemoveAllOverlays();
         
         // iOS specific camera handling
         if (this.isIOS) {
@@ -310,7 +255,89 @@ class TheHypeWayAR {
             this.showNotification('📹 AR activado! Busca el marker Hiro impreso');
         }, 1000);
         
-        console.log('🚀 AR Experience started - UI forcefully removed');
+        console.log('🚀 AR Experience started');
+    }
+    
+    forceRemoveAllOverlays() {
+        console.log('🔧 Force removing all overlays...');
+        
+        // List of all possible overlay selectors
+        const overlaySelectors = [
+            '#loading-screen',
+            '#instructions', 
+            '.overlay',
+            '.instruction-content',
+            '[class*="overlay"]',
+            '[id*="loading"]',
+            '[id*="instruction"]'
+        ];
+        
+        overlaySelectors.forEach(selector => {
+            const elements = document.querySelectorAll(selector);
+            elements.forEach(element => {
+                if (element) {
+                    // Multiple ways to hide/remove
+                    element.style.display = 'none !important';
+                    element.style.visibility = 'hidden !important';
+                    element.style.opacity = '0 !important';
+                    element.style.zIndex = '-9999 !important';
+                    element.style.position = 'absolute !important';
+                    element.style.left = '-9999px !important';
+                    element.style.top = '-9999px !important';
+                    element.style.pointerEvents = 'none !important';
+                    element.style.transform = 'translateX(-9999px) !important';
+                    
+                    // Remove from DOM after a brief delay
+                    setTimeout(() => {
+                        if (element.parentNode) {
+                            element.parentNode.removeChild(element);
+                        }
+                    }, 200);
+                    
+                    console.log('🔧 Removed overlay element:', selector);
+                }
+            });
+        });
+        
+        // Force show A-Frame scene
+        const scene = document.querySelector('a-scene');
+        if (scene) {
+            scene.style.display = 'block !important';
+            scene.style.visibility = 'visible !important';
+            scene.style.opacity = '1 !important';
+            scene.style.zIndex = '1 !important';
+            scene.style.position = 'fixed !important';
+            scene.style.top = '0 !important';
+            scene.style.left = '0 !important';
+            scene.style.width = '100vw !important';
+            scene.style.height = '100vh !important';
+            console.log('🔧 Forced A-Frame scene to be visible');
+        }
+        
+        // Force show A-Frame canvas
+        const canvas = document.querySelector('a-scene canvas');
+        if (canvas) {
+            canvas.style.width = '100vw !important';
+            canvas.style.height = '100vh !important';
+            canvas.style.position = 'fixed !important';
+            canvas.style.top = '0 !important';
+            canvas.style.left = '0 !important';
+            console.log('🔧 Forced A-Frame canvas to full screen');
+        }
+        
+        // Force show video element (camera feed)
+        setTimeout(() => {
+            const video = document.querySelector('video');
+            if (video) {
+                video.style.width = '100vw !important';
+                video.style.height = '100vh !important';
+                video.style.objectFit = 'cover !important';
+                video.style.position = 'fixed !important';
+                video.style.top = '0 !important';
+                video.style.left = '0 !important';
+                console.log('🔧 Forced video to full screen');
+            }
+        }, 500);
     }
     
     handleIOSCamera() {
@@ -571,9 +598,50 @@ class TheHypeWayAR {
 console.log('🔥 Starting The Hype Way AR initialization...');
 const theHypeWayAR = new TheHypeWayAR();
 
+// EMERGENCY OVERRIDE FOR STUBBORN OVERLAYS
+function forceRemoveOverlays() {
+    const elements = document.querySelectorAll('#loading-screen, #instructions, .overlay');
+    elements.forEach(el => {
+        if (el) {
+            el.remove(); // Remove completely from DOM
+        }
+    });
+    
+    // Force body class
+    document.body.classList.add('ar-started');
+    document.body.classList.remove('ar-loading');
+    
+    // Force scene visibility
+    const scene = document.querySelector('a-scene');
+    if (scene) {
+        scene.style.display = 'block !important';
+        scene.style.visibility = 'visible !important';
+        scene.style.opacity = '1 !important';
+        scene.style.position = 'fixed !important';
+        scene.style.top = '0 !important';
+        scene.style.left = '0 !important';
+        scene.style.width = '100vw !important';
+        scene.style.height = '100vh !important';
+        scene.style.zIndex = '1 !important';
+    }
+    
+    console.log('🔧 EMERGENCY: Force removed all overlays');
+}
+
 // Backup initialization for iOS and edge cases
 document.addEventListener('DOMContentLoaded', () => {
     console.log('📱 DOM Content Loaded');
+    
+    // Emergency button click handler with multiple attempts
+    document.addEventListener('click', (e) => {
+        if (e.target.id === 'start-ar') {
+            console.log('🔧 Emergency click handler triggered');
+            setTimeout(forceRemoveOverlays, 50);
+            setTimeout(forceRemoveOverlays, 200);
+            setTimeout(forceRemoveOverlays, 500);
+            setTimeout(forceRemoveOverlays, 1000);
+        }
+    });
     
     // iOS specific backup
     if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
@@ -591,38 +659,32 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }, 3000);
         
-        // iOS backup start button with forced UI removal
+        // iOS backup start button with super aggressive overlay removal
         setTimeout(() => {
             const startBtn = document.getElementById('start-ar');
             if (startBtn) {
                 startBtn.addEventListener('click', () => {
                     console.log('🔧 iOS backup start button clicked');
                     
-                    // Force remove ALL overlays
-                    const allOverlays = document.querySelectorAll('#loading-screen, #instructions, .overlay');
-                    allOverlays.forEach(element => {
-                        if (element) {
-                            element.style.display = 'none !important';
-                            element.style.visibility = 'hidden';
-                            element.style.opacity = '0';
-                            element.style.zIndex = '-9999';
-                            // Remove from DOM
-                            setTimeout(() => {
-                                if (element.parentNode) {
-                                    element.parentNode.removeChild(element);
-                                }
-                            }, 100);
-                        }
-                    });
-                    
-                    // Force show A-Frame scene
-                    const scene = document.querySelector('a-scene');
-                    if (scene) {
-                        scene.style.display = 'block !important';
-                        scene.style.visibility = 'visible !important';
-                        scene.style.opacity = '1 !important';
-                        scene.style.zIndex = '1 !important';
-                    }
+                    // SUPER AGGRESSIVE REMOVAL
+                    setTimeout(() => {
+                        document.body.classList.add('ar-started');
+                        forceRemoveOverlays();
+                        
+                        // Force full screen video
+                        setTimeout(() => {
+                            const video = document.querySelector('video');
+                            if (video) {
+                                video.style.width = '100vw !important';
+                                video.style.height = '100vh !important';
+                                video.style.objectFit = 'cover !important';
+                                video.style.position = 'fixed !important';
+                                video.style.top = '0 !important';
+                                video.style.left = '0 !important';
+                                video.style.zIndex = '1 !important';
+                            }
+                        }, 1000);
+                    }, 100);
                     
                     // Show camera request for iOS
                     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
