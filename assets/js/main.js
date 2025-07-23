@@ -1,10 +1,9 @@
-// The Hype Way AR - MINIMAL VERSION WITH TRACKING FIX
+// The Hype Way AR - WORKING VERSION + SIMPLE TRACKING FIX
 
-console.log('🔥 Loading Minimal AR Script with Tracking Fix');
+console.log('🔥 Loading Working AR Script');
 
 // Global variables
 let isARStarted = false;
-let markerFound = false;
 
 // Wait for page to load
 document.addEventListener('DOMContentLoaded', function() {
@@ -87,14 +86,9 @@ function startAR() {
     // Step 4: Request camera
     requestCamera();
     
-    // Step 5: Setup marker tracking
+    // Step 5: Show notification
     setTimeout(() => {
-        setupMarkerTracking();
-    }, 2000);
-    
-    // Step 6: Show notification
-    setTimeout(() => {
-        showNotification('📹 AR activado! Busca el marker Hiro impreso');
+        showNotification('📹 AR activado! Busca el marker Hiro');
     }, 1000);
 }
 
@@ -157,7 +151,6 @@ function forceSceneVisible() {
             canvas.style.position = 'fixed';
             canvas.style.top = '0';
             canvas.style.left = '0';
-            console.log('🔧 Canvas forced to full screen');
         }
     }, 500);
     
@@ -205,7 +198,7 @@ function setupAR() {
         if (scene) {
             scene.addEventListener('loaded', () => {
                 console.log('✅ A-Frame loaded');
-                // Don't setup marker events here - wait for AR to start
+                setupMarkerEvents();
             });
         } else {
             setTimeout(checkAFrame, 500);
@@ -215,35 +208,25 @@ function setupAR() {
     setTimeout(checkAFrame, 1000);
 }
 
-function setupMarkerTracking() {
-    console.log('🎯 Setting up marker tracking...');
-    
+function setupMarkerEvents() {
     const marker = document.querySelector('#jordan-1-marker');
     if (marker) {
-        console.log('✅ Marker element found');
-        
-        // Enhanced marker found event
         marker.addEventListener('markerFound', () => {
-            console.log('🎯 MARKER FOUND! AR content should be visible');
-            markerFound = true;
-            
-            // Show success notification
-            showNotification('🎯 ¡Marker encontrado! Mira el contenido AR');
+            console.log('🎯 Marker found!');
+            showNotification('✨ ¡Marker detectado! Contenido AR visible');
             
             // Show share button
             const shareBtn = document.getElementById('share-btn');
             if (shareBtn) {
                 shareBtn.classList.remove('hidden');
-                console.log('📱 Share button shown');
             }
             
-            // Setup AR interactions
+            // Setup AR interactions now that marker is found
             setupARInteractions();
         });
         
         marker.addEventListener('markerLost', () => {
             console.log('😞 Marker lost');
-            markerFound = false;
             
             // Hide share button
             const shareBtn = document.getElementById('share-btn');
@@ -252,43 +235,22 @@ function setupMarkerTracking() {
             }
         });
         
-        // Debug: Check marker status every 3 seconds
-        setInterval(() => {
-            if (isARStarted) {
-                const isVisible = marker.object3D && marker.object3D.visible;
-                console.log('🔍 Marker status check - Visible:', isVisible, 'Found:', markerFound);
-                
-                if (!markerFound) {
-                    console.log('💡 Tip: Asegúrate de tener buena iluminación y el marker Hiro impreso claramente');
-                }
-            }
-        }, 5000);
-        
-        console.log('✅ Marker events setup complete');
+        console.log('✅ Marker events setup');
     } else {
-        console.log('❌ Marker element NOT found - retrying...');
-        setTimeout(setupMarkerTracking, 1000);
+        console.log('❌ Marker not found, retrying...');
+        setTimeout(setupMarkerEvents, 1000);
     }
 }
 
 function setupARInteractions() {
-    console.log('🔧 Setting up AR interactions');
-    
-    // More info button
+    // More info button - only set up once
     const moreInfoBtn = document.querySelector('#more-info-btn');
-    if (moreInfoBtn) {
-        moreInfoBtn.addEventListener('click', function() {
-            console.log('🔍 More info button clicked');
+    if (moreInfoBtn && !moreInfoBtn.hasAttribute('data-setup')) {
+        moreInfoBtn.setAttribute('data-setup', 'true');
+        
+        moreInfoBtn.addEventListener('click', () => {
+            console.log('🔍 More info clicked');
             toggleDetails();
-        });
-        
-        // Add visual feedback for touch
-        moreInfoBtn.addEventListener('touchstart', function() {
-            this.setAttribute('scale', '0.9 0.9 0.9');
-        });
-        
-        moreInfoBtn.addEventListener('touchend', function() {
-            this.setAttribute('scale', '1 1 1');
         });
         
         console.log('✅ More info button setup');
@@ -296,11 +258,14 @@ function setupARInteractions() {
     
     // Close button
     const closeBtn = document.querySelector('#close-btn');
-    if (closeBtn) {
-        closeBtn.addEventListener('click', function() {
-            console.log('❌ Close button clicked');
+    if (closeBtn && !closeBtn.hasAttribute('data-setup')) {
+        closeBtn.setAttribute('data-setup', 'true');
+        
+        closeBtn.addEventListener('click', () => {
+            console.log('❌ Close clicked');
             hideDetails();
         });
+        
         console.log('✅ Close button setup');
     }
 }
@@ -319,22 +284,18 @@ function showDetails() {
     const detailsPanel = document.querySelector('#details-panel');
     if (detailsPanel) {
         detailsPanel.setAttribute('visible', 'true');
-        detailsPanel.setAttribute('animation', 'property: scale; from: 0.1 0.1 0.1; to: 1 1 1; dur: 300; easing: easeOutBack');
         detailsVisible = true;
-        console.log('📖 Details panel opened');
-        showNotification('📖 Información completa mostrada');
+        console.log('📖 Details shown');
+        showNotification('📖 Información ampliada');
     }
 }
 
 function hideDetails() {
     const detailsPanel = document.querySelector('#details-panel');
     if (detailsPanel && detailsVisible) {
-        detailsPanel.setAttribute('animation', 'property: scale; from: 1 1 1; to: 0.1 0.1 0.1; dur: 200; easing: easeInQuad');
-        setTimeout(() => {
-            detailsPanel.setAttribute('visible', 'false');
-        }, 200);
+        detailsPanel.setAttribute('visible', 'false');
         detailsVisible = false;
-        console.log('📖 Details panel closed');
+        console.log('📖 Details hidden');
     }
 }
 
@@ -363,7 +324,6 @@ function showNotification(message) {
         transition: opacity 0.3s ease;
         max-width: 90%;
         text-align: center;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.3);
     `;
     
     document.body.appendChild(notification);
@@ -384,53 +344,6 @@ function showNotification(message) {
     }, 4000);
 }
 
-// Share functionality
-function setupShareButton() {
-    const shareBtn = document.getElementById('share-btn');
-    if (shareBtn) {
-        shareBtn.addEventListener('click', function() {
-            console.log('📱 Share button clicked');
-            shareExperience();
-        });
-    }
-}
-
-function shareExperience() {
-    const shareData = {
-        title: 'The Hype Way AR - Air Jordan 1 Chicago',
-        text: '🔥 Acabo de descubrir la historia del Air Jordan 1 Chicago en AR! La cultura sneaker cobra vida con The Hype Way.',
-        url: window.location.href
-    };
-    
-    if (navigator.share) {
-        navigator.share(shareData)
-            .then(() => {
-                console.log('✅ Share successful');
-                showNotification('✅ ¡Compartido exitosamente!');
-            })
-            .catch(err => {
-                console.log('❌ Share failed:', err);
-                fallbackShare(shareData);
-            });
-    } else {
-        fallbackShare(shareData);
-    }
-}
-
-function fallbackShare(shareData) {
-    const textToCopy = `${shareData.text} ${shareData.url}`;
-    
-    if (navigator.clipboard) {
-        navigator.clipboard.writeText(textToCopy).then(() => {
-            showNotification('📋 ¡Enlace copiado al portapapeles!');
-        }).catch(() => {
-            showNotification('💡 Comparte: ' + shareData.url);
-        });
-    } else {
-        showNotification('💡 Comparte: ' + shareData.url);
-    }
-}
-
 // iOS specific fixes
 if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
     console.log('📱 iOS device detected');
@@ -449,30 +362,7 @@ if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
             e.preventDefault();
         }
     }, { passive: false });
-    
-    // iOS specific camera handling
-    document.addEventListener('touchend', function(e) {
-        if (e.target.id === 'start-ar') {
-            // Extra camera permission request for iOS
-            setTimeout(() => {
-                if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-                    navigator.mediaDevices.getUserMedia({ 
-                        video: { facingMode: 'environment' }
-                    }).then(stream => {
-                        console.log('📹 iOS camera access confirmed');
-                        stream.getTracks().forEach(track => track.stop());
-                    }).catch(err => {
-                        console.error('❌ iOS camera issue:', err);
-                        showNotification('⚠️ Configuración > Safari > Cámara > Permitir');
-                    });
-                }
-            }, 500);
-        }
-    });
 }
-
-// Setup share button when DOM is ready
-setTimeout(setupShareButton, 3000);
 
 // Emergency backup - if nothing works, this will
 setTimeout(() => {
@@ -491,31 +381,4 @@ setTimeout(() => {
     }
 }, 5000);
 
-// Debug info
-console.log('🔍 Debug Info:', {
-    userAgent: navigator.userAgent,
-    url: window.location.href,
-    screen: `${window.screen.width}x${window.screen.height}`,
-    iOS: /iPad|iPhone|iPod/.test(navigator.userAgent),
-    timestamp: new Date().toISOString()
-});
-
-console.log('🔥 Minimal AR script with tracking fix loaded');
-
-// Helper function to check AR.js status
-function checkARStatus() {
-    setTimeout(() => {
-        if (window.AFRAME && window.AFRAME.components) {
-            console.log('✅ A-Frame components loaded');
-            if (window.AFRAME.components['arjs']) {
-                console.log('✅ AR.js component loaded');
-            } else {
-                console.log('❌ AR.js component not found');
-            }
-        } else {
-            console.log('❌ A-Frame not fully loaded');
-        }
-    }, 4000);
-}
-
-checkARStatus();
+console.log('🔥 Working AR script loaded');
