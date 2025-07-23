@@ -54,8 +54,8 @@
     <a-scene
         id="ar-scene"  
         embedded
-        arjs="trackingMethod: best; sourceType: webcam; debugUIEnabled: false; detectionMode: mono; matrixCodeType: 3x3; cameraParametersUrl: https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.4.0/data/data/camera_para.dat;"
-        renderer="logarithmicDepthBuffer: true; colorManagement: true; sortObjects: true; antialias: false; alpha: true;"
+        arjs="trackingMethod: best; sourceType: webcam; debugUIEnabled: false; detectionMode: mono; matrixCodeType: 3x3;"
+        renderer="antialias: false; alpha: true; precision: mediump; logarithmicDepthBuffer: false;"
         vr-mode-ui="enabled: false"
         device-orientation-permission-ui="enabled: false"
         loading-screen="enabled: false">
