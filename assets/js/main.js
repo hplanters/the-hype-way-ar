@@ -1,4 +1,4 @@
-// The Hype Way AR - Main JavaScript (iOS Optimized)
+// The Hype Way AR - Main JavaScript (iOS Optimized + UI Fix)
 
 class TheHypeWayAR {
     constructor() {
@@ -138,7 +138,7 @@ class TheHypeWayAR {
                 });
                 
                 startBtn.addEventListener('touchend', (e) => {
-                    e.preventDefault();
+                    e.preventDefault();  
                     startBtn.style.transform = 'scale(1)';
                 });
             }
@@ -233,23 +233,69 @@ class TheHypeWayAR {
     startARExperience() {
         console.log('🚀 Starting AR Experience...');
         
-        // Hide instructions and loading
+        // Add AR active class to body for CSS targeting
+        document.body.classList.add('ar-active');
+        
+        // Hide instructions and loading IMMEDIATELY and COMPLETELY
         const instructions = document.getElementById('instructions');
         const loadingScreen = document.getElementById('loading-screen');
         
+        // Force hide instructions completely
         if (instructions) {
+            console.log('🔧 Removing instructions overlay completely');
+            instructions.style.display = 'none !important';
+            instructions.style.visibility = 'hidden';
             instructions.style.opacity = '0';
+            instructions.style.zIndex = '-1000';
+            instructions.style.pointerEvents = 'none';
+            // Remove completely from DOM after animation
             setTimeout(() => {
-                instructions.style.display = 'none';
-            }, 500);
+                if (instructions.parentNode) {
+                    instructions.parentNode.removeChild(instructions);
+                }
+            }, 100);
         }
         
+        // Force hide loading screen completely
         if (loadingScreen) {
+            console.log('🔧 Removing loading screen completely');
+            loadingScreen.style.display = 'none !important';
+            loadingScreen.style.visibility = 'hidden';
             loadingScreen.style.opacity = '0';
+            loadingScreen.style.zIndex = '-1000';
+            loadingScreen.style.pointerEvents = 'none';
+            // Remove completely from DOM after animation
             setTimeout(() => {
-                loadingScreen.style.display = 'none';
-            }, 500);
+                if (loadingScreen.parentNode) {
+                    loadingScreen.parentNode.removeChild(loadingScreen);
+                }
+            }, 100);
         }
+        
+        // Force show A-Frame scene
+        const scene = document.querySelector('a-scene');
+        if (scene) {
+            console.log('🔧 Forcing A-Frame scene to be visible');
+            scene.style.display = 'block !important';
+            scene.style.visibility = 'visible !important';
+            scene.style.opacity = '1 !important';
+            scene.style.zIndex = '1 !important';
+            scene.style.position = 'fixed !important';
+            scene.style.top = '0 !important';
+            scene.style.left = '0 !important';
+            scene.style.width = '100vw !important';
+            scene.style.height = '100vh !important';
+        }
+        
+        // Clear any remaining overlays
+        const overlays = document.querySelectorAll('.overlay');
+        overlays.forEach(overlay => {
+            if (overlay !== instructions) { // Already handled instructions
+                overlay.style.display = 'none !important';
+                overlay.style.visibility = 'hidden';
+                overlay.style.zIndex = '-1000';
+            }
+        });
         
         // iOS specific camera handling
         if (this.isIOS) {
@@ -259,7 +305,12 @@ class TheHypeWayAR {
             this.requestCameraPermission();
         }
         
-        console.log('🚀 AR Experience started');
+        // Show success message after a moment
+        setTimeout(() => {
+            this.showNotification('📹 AR activado! Busca el marker Hiro impreso');
+        }, 1000);
+        
+        console.log('🚀 AR Experience started - UI forcefully removed');
     }
     
     handleIOSCamera() {
@@ -276,37 +327,48 @@ class TheHypeWayAR {
                 console.log('📹 iOS Camera access granted');
                 // Stop the stream immediately as A-Frame will handle it
                 stream.getTracks().forEach(track => track.stop());
-                this.showNotification('📹 Cámara activada. Busca el marker Hiro');
+                
+                // Additional notification for iOS
+                setTimeout(() => {
+                    this.showNotification('🎯 Apunta al marker Hiro para ver el contenido AR');
+                }, 2000);
             }).catch(err => {
                 console.error('❌ iOS Camera access denied:', err);
                 this.showNotification('⚠️ Permite acceso a la cámara en Configuración > Safari');
                 
                 // Show iOS specific instructions
                 setTimeout(() => {
-                    const message = 'Para activar la cámara:\n1. Ve a Configuración iOS\n2. Safari > Cámara\n3. Permitir acceso';
+                    const message = 'Para activar la cámara:\n1. Ve a Configuración iOS\n2. Safari > Cámara\n3. Permitir acceso\n4. Recarga esta página';
                     alert(message);
                 }, 2000);
             });
         } else {
             console.log('❌ getUserMedia not available');
-            this.showNotification('❌ Cámara no disponible en este navegador');
+            this.showNotification('❌ Cámara no disponible en este navegador. Usa Safari.');
         }
     }
     
     requestCameraPermission() {
         // Standard camera permission request
         if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-            navigator.mediaDevices.getUserMedia({ video: true })
-                .then(stream => {
-                    console.log('📹 Camera access granted');
-                    // Stop the stream immediately as A-Frame will handle it
-                    stream.getTracks().forEach(track => track.stop());
-                    this.showNotification('📹 Cámara activada. Busca el marker');
-                })
-                .catch(err => {
-                    console.error('❌ Camera access denied:', err);
-                    this.showNotification('⚠️ Necesitas permitir acceso a la cámara');
-                });
+            navigator.mediaDevices.getUserMedia({ 
+                video: { 
+                    facingMode: 'environment',
+                    width: { ideal: 640 },
+                    height: { ideal: 480 }
+                } 
+            }).then(stream => {
+                console.log('📹 Camera access granted');
+                // Stop the stream immediately as A-Frame will handle it
+                stream.getTracks().forEach(track => track.stop());
+                
+                setTimeout(() => {
+                    this.showNotification('🎯 Apunta al marker Hiro para ver el contenido AR');
+                }, 1500);
+            }).catch(err => {
+                console.error('❌ Camera access denied:', err);
+                this.showNotification('⚠️ Necesitas permitir acceso a la cámara');
+            });
         }
     }
     
@@ -476,7 +538,7 @@ class TheHypeWayAR {
             color: white;
             padding: 12px 24px;
             border-radius: 25px;
-            z-index: 1001;
+            z-index: 10001;
             font-size: 14px;
             font-weight: bold;
             box-shadow: 0 4px 15px rgba(0,0,0,0.3);
@@ -509,7 +571,7 @@ class TheHypeWayAR {
 console.log('🔥 Starting The Hype Way AR initialization...');
 const theHypeWayAR = new TheHypeWayAR();
 
-// Backup initialization for iOS
+// Backup initialization for iOS and edge cases
 document.addEventListener('DOMContentLoaded', () => {
     console.log('📱 DOM Content Loaded');
     
@@ -529,17 +591,38 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }, 3000);
         
-        // iOS backup start button
+        // iOS backup start button with forced UI removal
         setTimeout(() => {
             const startBtn = document.getElementById('start-ar');
             if (startBtn) {
                 startBtn.addEventListener('click', () => {
                     console.log('🔧 iOS backup start button clicked');
-                    const loadingScreen = document.getElementById('loading-screen');
-                    const instructions = document.getElementById('instructions');
                     
-                    if (loadingScreen) loadingScreen.style.display = 'none';
-                    if (instructions) instructions.style.display = 'none';
+                    // Force remove ALL overlays
+                    const allOverlays = document.querySelectorAll('#loading-screen, #instructions, .overlay');
+                    allOverlays.forEach(element => {
+                        if (element) {
+                            element.style.display = 'none !important';
+                            element.style.visibility = 'hidden';
+                            element.style.opacity = '0';
+                            element.style.zIndex = '-9999';
+                            // Remove from DOM
+                            setTimeout(() => {
+                                if (element.parentNode) {
+                                    element.parentNode.removeChild(element);
+                                }
+                            }, 100);
+                        }
+                    });
+                    
+                    // Force show A-Frame scene
+                    const scene = document.querySelector('a-scene');
+                    if (scene) {
+                        scene.style.display = 'block !important';
+                        scene.style.visibility = 'visible !important';
+                        scene.style.opacity = '1 !important';
+                        scene.style.zIndex = '1 !important';
+                    }
                     
                     // Show camera request for iOS
                     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
