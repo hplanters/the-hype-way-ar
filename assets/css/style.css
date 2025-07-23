@@ -1,0 +1,200 @@
+/* Reset y base styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #000;
+    overflow: hidden;
+    user-select: none;
+}
+
+/* Loading Screen */
+#loading-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    transition: opacity 0.5s ease;
+}
+
+.loading-content {
+    text-align: center;
+    color: white;
+}
+
+.hype-logo {
+    font-size: 60px;
+    margin-bottom: 20px;
+    animation: pulse 2s infinite;
+}
+
+.loading-content h2 {
+    font-size: 28px;
+    margin-bottom: 10px;
+    color: #DC143C;
+    font-weight: bold;
+}
+
+.loading-content p {
+    font-size: 16px;
+    opacity: 0.8;
+    margin-bottom: 30px;
+}
+
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(220, 20, 60, 0.3);
+    border-top: 3px solid #DC143C;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto;
+}
+
+/* Instructions Overlay */
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 999;
+    backdrop-filter: blur(10px);
+}
+
+.instruction-content {
+    background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+    padding: 30px;
+    border-radius: 15px;
+    max-width: 350px;
+    text-align: center;
+    color: white;
+    border: 2px solid #DC143C;
+    box-shadow: 0 10px 30px rgba(220, 20, 60, 0.3);
+}
+
+.instruction-content h3 {
+    font-size: 22px;
+    margin-bottom: 20px;
+    color: #DC143C;
+}
+
+.instruction-content ol {
+    text-align: left;
+    margin-bottom: 25px;
+    padding-left: 20px;
+}
+
+.instruction-content li {
+    margin-bottom: 10px;
+    line-height: 1.5;
+}
+
+.cta-button {
+    background: linear-gradient(135deg, #DC143C 0%, #B91C5C 100%);
+    color: white;
+    border: none;
+    padding: 15px 30px;
+    border-radius: 25px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 100%;
+    box-shadow: 0 4px 15px rgba(220, 20, 60, 0.3);
+}
+
+.cta-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(220, 20, 60, 0.5);
+}
+
+/* Share Button */
+.share-button {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: linear-gradient(135deg, #DC143C 0%, #B91C5C 100%);
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 25px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 998;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.share-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(220, 20, 60, 0.4);
+}
+
+.hidden {
+    display: none;
+}
+
+/* AR Scene */
+a-scene {
+    width: 100vw;
+    height: 100vh;
+}
+
+/* Animations */
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+}
+
+/* Responsive Design */
+@media (max-width: 480px) {
+    .instruction-content {
+        margin: 20px;
+        padding: 25px;
+    }
+    
+    .loading-content h2 {
+        font-size: 24px;
+    }
+    
+    .hype-logo {
+        font-size: 50px;
+    }
+    
+    .share-button {
+        bottom: 15px;
+        right: 15px;
+        padding: 10px 16px;
+        font-size: 12px;
+    }
+}
+
+/* Hide A-Frame default UI */
+.a-enter-vr-button {
+    display: none !important;
+}
+
+.a-orientation-modal {
+    display: none !important;
+}
