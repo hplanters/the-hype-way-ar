@@ -2,12 +2,17 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
     <title>The Hype Way AR - Sneaker Culture</title>
     
-    <!-- A-Frame y AR.js -->
-    <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.4.5/aframe/build/aframe-ar.min.js"></script>
+    <!-- iOS specific meta tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="format-detection" content="telephone=no">
+    
+    <!-- A-Frame y AR.js - versiones compatibles con iOS -->
+    <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.4.0/aframe/build/aframe-ar.min.js"></script>
     
     <!-- Estilos custom -->
     <link rel="stylesheet" href="assets/css/style.css">
@@ -36,32 +41,37 @@
             <h3>🎯 ¿Cómo usar?</h3>
             <ol>
                 <li>Permite acceso a la cámara</li>
-                <li>Apunta a tu sneaker planter</li>
-                <li>Espera a que aparezca la información</li>
+                <li>Descarga e imprime el <a href="https://github.com/AR-js-org/AR.js/blob/master/data/images/hiro.png" target="_blank">Marker Hiro</a></li>
+                <li>Apunta a la imagen impresa</li>
                 <li>Toca para más detalles</li>
             </ol>
+            <p class="ios-note">📱 <strong>iPhone:</strong> Usa Safari, no Chrome</p>
             <button id="start-ar" class="cta-button">¡Empezar AR!</button>
         </div>
     </div>
     
     <!-- AR Scene -->
     <a-scene
-        id="ar-scene"
+        id="ar-scene"  
         embedded
-        arjs="trackingMethod: best; sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3;"
-        renderer="logarithmicDepthBuffer: true; colorManagement: true; sortObjects: true;"
+        arjs="trackingMethod: best; sourceType: webcam; debugUIEnabled: false; detectionMode: mono; matrixCodeType: 3x3; cameraParametersUrl: https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.4.0/data/data/camera_para.dat;"
+        renderer="logarithmicDepthBuffer: true; colorManagement: true; sortObjects: true; antialias: false; alpha: true;"
         vr-mode-ui="enabled: false"
-        device-orientation-permission-ui="enabled: false">
+        device-orientation-permission-ui="enabled: false"
+        loading-screen="enabled: false">
         
-        <!-- Marker para Jordan 1 Chicago -->
+        <!-- Marker Hiro (compatible con iPhone) -->
         <a-marker
             id="jordan-1-marker"
             type="pattern"
             preset="hiro"
-            
             raycaster="objects: .clickable"
             emitevents="true"
-            cursor="fuse: false; rayOrigin: mouse;">
+            cursor="fuse: false; rayOrigin: mouse;"
+            smooth="true"
+            smoothCount="10"
+            smoothTolerance="0.01"
+            smoothThreshold="5">
             
             <!-- Contenedor principal del contenido AR -->
             <a-entity id="ar-content" position="0 0 0" rotation="-90 0 0">
@@ -206,7 +216,39 @@
         📱 Compartir
     </button>
     
-    <!-- Scripts -->
+    <!-- iOS specific script -->
+    <script>
+    // iOS specific fixes
+    if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
+        console.log('📱 iOS device detected');
+        
+        // Prevent zoom
+        document.addEventListener('touchstart', function(e) {
+            if (e.touches.length > 1) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+        
+        let lastTouchEnd = 0;
+        document.addEventListener('touchend', function(e) {
+            const now = (new Date()).getTime();
+            if (now - lastTouchEnd <= 300) {
+                e.preventDefault();
+            }
+            lastTouchEnd = now;
+        }, false);
+        
+        // Force viewport height for iOS
+        const setViewportHeight = () => {
+            document.documentElement.style.setProperty('--vh', `${window.innerHeight * 0.01}px`);
+        };
+        setViewportHeight();
+        window.addEventListener('resize', setViewportHeight);
+        window.addEventListener('orientationchange', setViewportHeight);
+    }
+    </script>
+    
+    <!-- Main Scripts -->
     <script src="assets/js/main.js"></script>
 </body>
 </html>
