@@ -450,10 +450,15 @@ a-scene {
     outline-offset: 2px;
 }
 
+/* ============================================= */
+/* CRITICAL AR FIXES - MUST BE AT THE END */
+/* ============================================= */
+
 /* FORCE HIDE OVERLAYS WHEN AR STARTS */
 body.ar-started #loading-screen,
 body.ar-started #instructions,
-body.ar-started .overlay {
+body.ar-started .overlay,
+body.ar-started .instruction-content {
     display: none !important;
     visibility: hidden !important;
     opacity: 0 !important;
@@ -462,9 +467,15 @@ body.ar-started .overlay {
     position: absolute !important;
     left: -9999px !important;
     top: -9999px !important;
+    transform: translateX(-9999px) !important;
+    width: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
 }
 
-body.ar-started a-scene {
+/* FORCE FULL SCREEN AR SCENE AND CAMERA */
+body.ar-started a-scene,
+body.ar-started a-scene canvas {
     display: block !important;
     visibility: visible !important;
     opacity: 1 !important;
@@ -472,16 +483,94 @@ body.ar-started a-scene {
     position: fixed !important;
     top: 0 !important;
     left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
     width: 100vw !important;
     height: 100vh !important;
+    height: calc(var(--vh, 1vh) * 100) !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    outline: none !important;
 }
 
-/* Emergency override for iOS */
+/* FORCE FULL SCREEN VIDEO (CAMERA FEED) */
+body.ar-started video {
+    display: block !important;
+    visibility: visible !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    height: calc(var(--vh, 1vh) * 100) !important;
+    object-fit: cover !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    z-index: 1 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    outline: none !important;
+}
+
+/* Emergency override for iOS WebKit */
 @supports (-webkit-appearance: none) {
     body.ar-started #loading-screen,
     body.ar-started #instructions,
-    body.ar-started .overlay {
-        -webkit-transform: translateX(-9999px) !important;
-        transform: translateX(-9999px) !important;
+    body.ar-started .overlay,
+    body.ar-started .instruction-content {
+        -webkit-transform: translateX(-9999px) translateY(-9999px) !important;
+        transform: translateX(-9999px) translateY(-9999px) !important;
+        -webkit-clip-path: inset(100%) !important;
+        clip-path: inset(100%) !important;
+    }
+    
+    body.ar-started a-scene,
+    body.ar-started a-scene canvas,
+    body.ar-started video {
+        -webkit-transform: none !important;
+        transform: none !important;
+        -webkit-clip-path: none !important;
+        clip-path: none !important;
+    }
+}
+
+/* Force override for stubborn elements */
+body.ar-started * {
+    max-width: none !important;
+    max-height: none !important;
+}
+
+body.ar-started *:not(a-scene):not(canvas):not(video):not(.ar-notification):not(.share-button) {
+    z-index: -1 !important;
+}
+
+/* Ensure AR content is always on top */
+body.ar-started .ar-notification {
+    z-index: 10001 !important;
+}
+
+body.ar-started .share-button {
+    z-index: 10000 !important;
+}
+
+/* Mobile viewport fix for AR */
+@media screen and (max-width: 768px) {
+    body.ar-started {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        overflow: hidden !important;
+    }
+    
+    body.ar-started a-scene,
+    body.ar-started video {
+        transform: translateZ(0) !important;
+        -webkit-transform: translateZ(0) !important;
+        backface-visibility: hidden !important;
+        -webkit-backface-visibility: hidden !important;
     }
 }
