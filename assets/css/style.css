@@ -1,4 +1,4 @@
-/* MINIMAL CSS - GUARANTEED TO WORK + AR Z-INDEX FIX */
+/* MINIMAL CSS - GUARANTEED TO WORK + ALL FIXES */
 
 /* Reset */
 * {
@@ -226,6 +226,8 @@ body.ar-active {
     width: 100vw !important;
     height: 100vh !important;
     overflow: hidden !important;
+    margin: 0 !important;
+    padding: 0 !important;
 }
 
 body.ar-active a-scene {
@@ -391,4 +393,159 @@ body.ar-active a-marker[visible="true"] a-plane {
 /* Ensure share button stays on top when AR is active */
 body.ar-active .share-button {
     z-index: 999 !important;
+}
+
+/* ===== FIX FRANJA NEGRA - FORCE REAL FULL SCREEN ===== */
+body.ar-active video,
+body.ar-active a-scene canvas {
+    width: 100vw !important;
+    height: 100vh !important;
+    min-width: 100vw !important;
+    min-height: 100vh !important;
+    max-width: none !important;
+    max-height: none !important;
+    object-fit: cover !important;
+    object-position: center !important;
+    left: 0 !important;
+    right: 0 !important;
+    top: 0 !important;
+    bottom: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+}
+
+/* Force body and html to prevent any margins */
+body.ar-active,
+body.ar-active html {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    overflow: hidden !important;
+}
+
+/* ===== IMPROVED AR CONTENT DESIGN ===== */
+body.ar-active #title-text {
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.8) !important;
+    background: rgba(0,0,0,0.7) !important;
+    padding: 10px 20px !important;
+    border-radius: 10px !important;
+    font-weight: bold !important;
+    color: #DC143C !important;
+}
+
+body.ar-active #year-designer {
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.8) !important;
+    background: rgba(0,0,0,0.6) !important;
+    padding: 5px 15px !important;
+    border-radius: 8px !important;
+    color: #FFFFFF !important;
+}
+
+body.ar-active #iconic-fact {
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.8) !important;
+    background: rgba(255,215,0,0.2) !important;
+    padding: 8px 15px !important;
+    border-radius: 8px !important;
+    border: 2px solid #FFD700 !important;
+    color: #FFD700 !important;
+    font-weight: bold !important;
+}
+
+body.ar-active #more-info-btn {
+    background: rgba(220,20,60,0.9) !important;
+    border: 2px solid #DC143C !important;
+    box-shadow: 0 4px 15px rgba(220,20,60,0.6) !important;
+    color: #FFFFFF !important;
+    font-weight: bold !important;
+    cursor: pointer !important;
+    transition: all 0.3s ease !important;
+}
+
+body.ar-active #more-info-btn:hover {
+    background: rgba(220,20,60,1) !important;
+    transform: scale(1.05) !important;
+}
+
+body.ar-active #bg-panel {
+    background: rgba(0,0,0,0.8) !important;
+    border: 1px solid rgba(220,20,60,0.5) !important;
+    border-radius: 15px !important;
+}
+
+body.ar-active #brand-credit {
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.8) !important;
+    background: rgba(0,0,0,0.5) !important;
+    padding: 5px 10px !important;
+    border-radius: 5px !important;
+    color: #FFFFFF !important;
+    opacity: 0.8 !important;
+}
+
+/* Details panel styling */
+body.ar-active #details-panel {
+    background: rgba(26,26,26,0.95) !important;
+    border: 2px solid #DC143C !important;
+    border-radius: 15px !important;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.8) !important;
+}
+
+body.ar-active #details-text {
+    color: #FFFFFF !important;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.8) !important;
+    line-height: 1.6 !important;
+}
+
+body.ar-active #close-btn {
+    background: rgba(220,20,60,0.8) !important;
+    border: 2px solid #DC143C !important;
+    color: #FFFFFF !important;
+    font-weight: bold !important;
+    cursor: pointer !important;
+}
+
+body.ar-active #close-btn:hover {
+    background: rgba(220,20,60,1) !important;
+    transform: scale(1.1) !important;
+}
+
+/* Force clickable elements to be more interactive */
+body.ar-active .clickable {
+    cursor: pointer !important;
+    user-select: none !important;
+    -webkit-user-select: none !important;
+    touch-action: manipulation !important;
+}
+
+/* Enhanced mobile AR visibility */
+@media (max-width: 768px) {
+    body.ar-active #title-text {
+        font-size: 1.4em !important;
+        padding: 12px 24px !important;
+    }
+    
+    body.ar-active #year-designer {
+        font-size: 1.1em !important;
+        padding: 8px 18px !important;
+    }
+    
+    body.ar-active #iconic-fact {
+        font-size: 1.2em !important;
+        padding: 10px 20px !important;
+    }
+    
+    body.ar-active #more-info-btn {
+        min-height: 50px !important;
+        min-width: 200px !important;
+        font-size: 1.1em !important;
+    }
+}
+
+/* Ultra high contrast for better AR visibility */
+body.ar-active a-text {
+    text-rendering: optimizeLegibility !important;
+    font-smooth: always !important;
+    -webkit-font-smoothing: antialiased !important;
+    -moz-osx-font-smoothing: grayscale !important;
 }
